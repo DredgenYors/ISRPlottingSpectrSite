@@ -41,9 +41,12 @@
         }
     </style>
     <script>
-        function updateValue(inputElement) {
-            let valueDisplay = inputElement.nextElementSibling;
-            valueDisplay.textContent = inputElement.value ? "Current value: " + inputElement.value : "Current value:";
+        function storeValue(event, inputElement) {
+            if (event.key === 'Enter') {
+                let valueDisplay = inputElement.nextElementSibling;
+                valueDisplay.textContent = inputElement.value ? "Current value: " + inputElement.value : "Current value:";
+                inputElement.blur(); // Remove focus after pressing Enter
+            }
         }
     </script>
 </head>
@@ -52,7 +55,7 @@
         {% for i in range(10) %}
             <div class="input-container">
                 <div>Input {{ i+1 }}</div>
-                <input type="text" oninput="updateValue(this)" placeholder="Input {{ i+1 }}">
+                <input type="text" onkeypress="storeValue(event, this)" placeholder="Input {{ i+1 }}">
                 <div>Current value:</div>
             </div>
         {% endfor %}
@@ -62,4 +65,5 @@
     </div>
 </body>
 </html>
+
 
