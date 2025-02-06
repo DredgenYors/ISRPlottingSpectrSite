@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask Plot Viewer</title>
+    <style>
+        body {
+            display: flex;
+            height: 100vh;
+            margin: 0;
+        }
+        .left-panel {
+            width: 20%;
+            background: #f4f4f4;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .right-panel {
+            width: 80%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .plot-window {
+            width: 90%;
+            height: 90%;
+            border: 1px solid #ccc;
+        }
+        input {
+            width: 80%;
+            margin: 5px 0;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="left-panel">
+        {% for i in range(10) %}
+            <input type="text" placeholder="Input {{ i+1 }}">
+        {% endfor %}
+    </div>
+    <div class="right-panel">
+        <iframe class="plot-window" src="/plot"></iframe>
+    </div>
+</body>
+</html>
