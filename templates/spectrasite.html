@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISR Spectra Simulator</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            font-size: 3em;
+            text-align: center;
+            opacity: 0;
+            animation: fadeInOut 5s ease-in-out forwards;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            opacity: 0;
+            animation: fadeIn 3s ease-in-out forwards;
+            animation-delay: 5s;
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        .button-container button {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            border: none;
+            background-color: #007BFF;
+            color: white;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .button-container button:hover {
+            background-color: #0056b3;
+        }
+        .plot-container {
+            width: 90%;
+            height: 80%;
+            background-color: #cccccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid black;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="header">ISR Spectra Simulator</h1>
+    <div class="button-container" id="buttons">
+        <button onclick="window.location.href='/plot_page';">Plotting</button>
+        <button onclick="window.location.href='https://www.google.com';">Jupyter Notebook</button>
+        <button onclick="window.location.href='https://www.bing.com';">ISR Site</button>
+    </div>
+    <script>
+        function openPlotWindow() {
+    // Open a new window and keep a reference to it
+    const plotWindow = window.open('', '_blank', 'width=800,height=600');
+
+    // Write custom HTML content to the new window
+    plotWindow.document.write(`
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <title>ISR Spectra Plot</title>
+            <style>
+                body {
+                    margin: 0;
+                    font-family: Arial, sans-serif;
+                }
+                .plot-container {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    background-color: #f4f4f4;
+                }
+                img {
+                    max-width: 100%;
+                    height: auto;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="plot-container">
+                <img src="/plot" alt="Spectra Plot">
+            </div>
+        </body>
+        </html>
+    `);
+
+    // Close the document to finish loading the content
+    plotWindow.document.close();
+}
+    </script>
+</body>
+</html>
