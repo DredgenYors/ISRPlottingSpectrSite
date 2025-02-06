@@ -30,17 +30,31 @@
             height: 90%;
             border: 1px solid #ccc;
         }
-        input {
+        .input-container {
             width: 80%;
-            margin: 5px 0;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        input {
+            width: 100%;
             padding: 5px;
         }
     </style>
+    <script>
+        function updateValue(inputElement) {
+            let valueDisplay = inputElement.nextElementSibling;
+            valueDisplay.textContent = inputElement.value ? "Current value: " + inputElement.value : "Current value:";
+        }
+    </script>
 </head>
 <body>
     <div class="left-panel">
         {% for i in range(10) %}
-            <input type="text" placeholder="Input {{ i+1 }}">
+            <div class="input-container">
+                <div>Input {{ i+1 }}</div>
+                <input type="text" oninput="updateValue(this)" placeholder="Input {{ i+1 }}">
+                <div>Current value:</div>
+            </div>
         {% endfor %}
     </div>
     <div class="right-panel">
@@ -48,3 +62,4 @@
     </div>
 </body>
 </html>
+
