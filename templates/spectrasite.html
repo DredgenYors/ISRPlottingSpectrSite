@@ -70,46 +70,5 @@
         <button onclick="window.location.href='https://www.google.com';">Jupyter Notebook</button>
         <button onclick="window.location.href='https://www.bing.com';">ISR Site</button>
     </div>
-    <script>
-        function openPlotWindow() {
-    // Open a new window and keep a reference to it
-    const plotWindow = window.open('', '_blank', 'width=800,height=600');
-
-    // Write custom HTML content to the new window
-    plotWindow.document.write(`
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <title>ISR Spectra Plot</title>
-            <style>
-                body {
-                    margin: 0;
-                    font-family: Arial, sans-serif;
-                }
-                .plot-container {
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    height: 100vh;
-                    background-color: #f4f4f4;
-                }
-                img {
-                    max-width: 100%;
-                    height: auto;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="plot-container">
-                <img src="/plot" alt="Spectra Plot">
-            </div>
-        </body>
-        </html>
-    `);
-
-    // Close the document to finish loading the content
-    plotWindow.document.close();
-}
-    </script>
 </body>
 </html>
