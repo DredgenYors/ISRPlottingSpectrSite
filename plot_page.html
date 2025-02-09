@@ -41,13 +41,10 @@
         }
     </style>
     <script>
-        function storeValue(event, inputElement) {
-            if (event.key === 'Enter') {
-                let valueDisplay = inputElement.nextElementSibling;
-                valueDisplay.textContent = inputElement.value ? "Current value: " + inputElement.value : "Current value:";
-                inputElement.blur(); // Remove focus after pressing Enter
-            }
-        }
+        // Load the plot dynamically after the page has fully loaded
+        window.onload = function () {
+            document.getElementById("plot-frame").src = "/plot";
+        };
     </script>
 </head>
 <body>
@@ -55,15 +52,13 @@
         {% for i in range(10) %}
             <div class="input-container">
                 <div>Input {{ i+1 }}</div>
-                <input type="text" onkeypress="storeValue(event, this)" placeholder="Input {{ i+1 }}">
+                <input type="text" placeholder="Input {{ i+1 }}">
                 <div>Current value:</div>
             </div>
         {% endfor %}
     </div>
     <div class="right-panel">
-        <iframe class="plot-window" src="/plot"></iframe>
+        <iframe id="plot-frame" class="plot-window" src="about:blank"></iframe>
     </div>
 </body>
 </html>
-
-
