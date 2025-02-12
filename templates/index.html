@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NJIT Radar Collective</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div id="main-container">
+        <div id="header-section">
+            <img src="{{ url_for('static', filename='isrbuildingheader.jpg') }}" alt="ISR Banner" id="header-image">
+            <h1 id="header-title">New Jersey Institute of Technology Radar Collective</h1>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div id="nav-buttons">
+            <button class="nav-btn" onclick="toggleDropdown('THEORY')">THEORY</button>
+            <button class="nav-btn" onclick="toggleDropdown('OBSERVATION')">OBSERVATION</button>
+            <button class="nav-btn" onclick="toggleDropdown('EXPERIMENT')">EXPERIMENT</button>
+            <button class="nav-btn" onclick="toggleDropdown('JUPYTER_NOTEBOOK')">JUPYTER NOTEBOOK</button>
+            <button class="nav-btn" onclick="redirectToSimulation()">SIMULATION</button> <!-- Redirects to spectrasite -->
+        </div>
+
+        <!-- Dropdown Container -->
+        <div id="dropdown-container"></div>
+
+        <!-- ISR Page Content -->
+        <div id="isr-content">
+            <p>
+                The goal of this website is to be a contemporary, online “textbook” for Incoherent Scatter Radars.
+                Each chapter contains Jupyter Notebooks to illustrate the concepts and provides basic Python code for research.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function redirectToSimulation() {
+            window.location.href = "/spectrasite"; // Redirects to spectrasite.html
+        }
+    </script>
+</body>
+</html>
