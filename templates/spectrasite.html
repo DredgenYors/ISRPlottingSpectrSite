@@ -68,7 +68,13 @@
     <div class="button-container" id="buttons">
         <button onclick="window.location.href='/plot_page';">Plotting</button>
         <button onclick="window.location.href='https://www.google.com';">Jupyter Notebook</button>
-        <button onclick="window.location.href='https://www.bing.com';">ISR Site</button>
+        <button onclick="redirectToISR()">ISR Site</button>
     </div>
+
+    <script>
+        function redirectToISR() {
+            window.location.href = "/"; // Redirects back to the main ISR site (index.html)
+        }
+    </script>
 </body>
 </html>
