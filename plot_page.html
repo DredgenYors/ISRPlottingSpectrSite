@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flask Plot Viewer</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         body {
             display: flex;
@@ -16,9 +17,20 @@
             padding: 10px;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 15px;
+            gap: 10px;
             overflow-y: auto;
+        }
+        .param-section {
+            width: 100%;
+            padding: 5px;
+            background: #ddd;
+            font-weight: bold;
+            text-align: center;
+        }
+        .param-container {
+            padding: 5px;
+            overflow-y: auto;
+            max-height: 40vh; /* Adjust for better usability */
         }
         .right-panel {
             width: 75%;
@@ -32,12 +44,12 @@
             border: 1px solid #ccc;
         }
         .input-container {
-            width: 90%;
+            width: 100%;
             text-align: center;
             margin-bottom: 10px;
         }
         input {
-            width: 100%;
+            width: 90%;
             padding: 5px;
         }
         .button-container {
@@ -66,55 +78,115 @@
         .reset-btn:hover {
             background-color: #a71d2a;
         }
+        .svg-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+        svg {
+            width: 1400px;
+            height: 900px;
+            background-color: white;
+            border: 1px solid #ccc;
+        }
+        .grid line {
+            stroke: lightgray;
+            stroke-opacity: 0.7;
+        }
     </style>
     <script>
         const defaultValues = {
+            // Non-constant values
             nu_i: "1.0e-7",
             nu_e: "1.0e-7",
             ni: "2.0e11",
             ne: "2.0e11",
+            theta: "60",
+            Te: "500",
+            n_terms: "2000",
+            
+            // Constant values
             mi: "2.65686e-26",
             me: "9.11e-31",
             B: "3.6e-5",
-            theta: "60",
-            Te: "500",
             epsilon_0: "8.854187817e-12",
             kB: "1.380649e-23",
-            e: "1.602e-19",
-            n_terms: "2000"
+            e: "1.602e-19"
         };
 
         function generatePlot() {
-            let inputValues = {};
-            for (let key in defaultValues) {
-                inputValues[key] = document.getElementById(key).value;
-            }
+            let newValues = {};
+            document.querySelectorAll("input").forEach(input => {
+                newValues[input.id] = parseFloat(input.value);
+            });
 
             fetch('/update_values', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(inputValues)
-            }).then(response => {
-                if (response.ok) {
-                    document.getElementById("plot-frame").src = "/plot";
+                body: JSON.stringify(newValues)
+            })
+            .then(response => response.json())
+            .then(() => {
+                return fetch('/plot');
+            })
+            .then(response => response.json())
+            .then(data => {
+                const frequencies = data.frequencies;
+                const spectra = data.spectra;
+
+                const width = 1000;
+                const height = 700;
+                const margin = { top: 20, right: 30, bottom: 50, left: 70 };
+                
+                const xScale = d3.scaleLinear()
+                                .domain([d3.min(frequencies), d3.max(frequencies)])
+                                .range([margin.left, width - margin.right]);
+                
+                const yScale = d3.scaleLog()
+                                .domain([d3.min(spectra), d3.max(spectra)])
+                                .range([height - margin.bottom, margin.top]);
+                
+                const svg = d3.select("svg");
+                svg.selectAll("*").remove();
+                
+                const zoom = d3.zoom()
+                    .scaleExtent([1, 10])
+                    .translateExtent([[0, 0], [width, height]])
+                    .on("zoom", zoomed);
+                
+                svg.call(zoom);
+                
+                const g = svg.append("g");
+                
+                g.append("g")
+                    .attr("transform", `translate(0,${height - margin.bottom})`)
+                    .call(d3.axisBottom(xScale));
+                
+                g.append("g")
+                    .attr("transform", `translate(${margin.left},0)`)
+                    .call(d3.axisLeft(yScale).ticks(10, ".1e"));
+                
+                g.append("path")
+                    .datum(frequencies.map((d, i) => ({ x: d, y: spectra[i] })))
+                    .attr("fill", "none")
+                    .attr("stroke", "blue")
+                    .attr("stroke-width", 2)
+                    .attr("d", d3.line()
+                                .x(d => xScale(d.x))
+                                .y(d => yScale(d.y)));
+                
+                function zoomed(event) {
+                    g.attr("transform", event.transform);
                 }
             });
         }
 
         function resetValues() {
-            for (let key in defaultValues) {
-                document.getElementById(key).value = defaultValues[key];
-            }
-
-            fetch('/update_values', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(defaultValues)
-            }).then(response => {
-                if (response.ok) {
-                    document.getElementById("plot-frame").src = "/plot";  // Regenerate plot with defaults
-                }
+            document.querySelectorAll("input").forEach(input => {
+                input.value = defaultValues[input.id];
             });
+            generatePlot();
         }
     </script>
 </head>
@@ -125,75 +197,107 @@
             <button class="button reset-btn" onclick="resetValues()">Reset</button>
         </div>
 
-        <div class="input-container">
-            <div>Ion Collision Frequency [Hz]</div>
-            <input type="text" id="nu_i" placeholder="Ion Collision Frequency" value="1.0e-7">
+        <!-- Upper Section: Non-Constant Parameters -->
+        <div class="param-section">Variable Parameters</div>
+        <div class="param-container" id="variable-params">
+            <div class="input-container">
+                <div>Ion Collision Frequency [Hz]</div>
+                <input type="text" id="nu_i" value="1.0e-7">
+            </div>
+
+            <div class="input-container">
+                <div>Electron Collision Frequency [Hz]</div>
+                <input type="text" id="nu_e" value="1.0e-7">
+            </div>
+
+            <div class="input-container">
+                <div>Ion Density [m⁻³]</div>
+                <input type="text" id="ni" value="2.0e11">
+            </div>
+
+            <div class="input-container">
+                <div>Electron Density [m⁻³]</div>
+                <input type="text" id="ne" value="2.0e11">
+            </div>
+
+            <div class="input-container">
+                <div>Scattering Angle [°]</div>
+                <input type="text" id="theta" value="60">
+            </div>
+
+            <div class="input-container">
+                <div>Electron Temperature [K]</div>
+                <input type="text" id="Te" value="500">
+            </div>
+
+            <div class="input-container">
+                <div>N Terms [unitless]</div>
+                <input type="text" id="n_terms" value="2000">
+            </div>
         </div>
 
-        <div class="input-container">
-            <div>Electron Collision Frequency [Hz]</div>
-            <input type="text" id="nu_e" placeholder="Electron Collision Frequency" value="1.0e-7">
-        </div>
+        <!-- Lower Section: Constant Parameters -->
+        <div class="param-section">Constant Parameters</div>
+        <div class="param-container" id="constant-params">
+            <div class="input-container">
+                <div>Ion Mass [kg]</div>
+                <input type="text" id="mi" value="2.65686e-26">
+            </div>
 
-        <div class="input-container">
-            <div>Ion Density [m⁻³]</div>
-            <input type="text" id="ni" placeholder="Ion Density" value="2.0e11">
-        </div>
+            <div class="input-container">
+                <div>Electron Mass [kg]</div>
+                <input type="text" id="me" value="9.11e-31">
+            </div>
 
-        <div class="input-container">
-            <div>Electron Density [m⁻³]</div>
-            <input type="text" id="ne" placeholder="Electron Density" value="2.0e11">
-        </div>
+            <div class="input-container">
+                <div>Magnetic Field [T]</div>
+                <input type="text" id="B" value="3.6e-5">
+            </div>
 
-        <div class="input-container">
-            <div>Ion Mass [kg]</div>
-            <input type="text" id="mi" placeholder="Ion Mass" value="2.65686e-26">
-        </div>
+            <div class="input-container">
+                <div>Vacuum Permittivity [F/m]</div>
+                <input type="text" id="epsilon_0" value="8.854187817e-12">
+            </div>
 
-        <div class="input-container">
-            <div>Electron Mass [kg]</div>
-            <input type="text" id="me" placeholder="Electron Mass" value="9.11e-31">
-        </div>
+            <div class="input-container">
+                <div>Boltzmann Constant [J/K]</div>
+                <input type="text" id="kB" value="1.380649e-23">
+            </div>
 
-        <div class="input-container">
-            <div>Magnetic Field [T]</div>
-            <input type="text" id="B" placeholder="Magnetic Field" value="3.6e-5">
+            <div class="input-container">
+                <div>Elementary Charge [C]</div>
+                <input type="text" id="e" value="1.602e-19">
+            </div>
         </div>
-
-        <div class="input-container">
-            <div>Scattering Angle [°]</div>
-            <input type="text" id="theta" placeholder="Scattering Angle" value="60">
-        </div>
-
-        <div class="input-container">
-            <div>Electron Temperature [K]</div>
-            <input type="text" id="Te" placeholder="Electron Temperature" value="500">
-        </div>
-
-        <div class="input-container">
-            <div>Vacuum Permittivity [F/m]</div>
-            <input type="text" id="epsilon_0" placeholder="Vacuum Permittivity" value="8.854187817e-12">
-        </div>
-
-        <div class="input-container">
-            <div>Boltzmann Constant [J/K]</div>
-            <input type="text" id="kB" placeholder="Boltzmann Constant" value="1.380649e-23">
-        </div>
-
-        <div class="input-container">
-            <div>Elementary Charge [C]</div>
-            <input type="text" id="e" placeholder="Elementary Charge" value="1.602e-19">
-        </div>
-
-        <div class="input-container">
-            <div>N Terms [unitless]</div>
-            <input type="text" id="n_terms" placeholder="N Terms" value="2000">
+        <div class="param-section">Range Parameters</div>
+        <div class="param-container" id="range-params">
+            <div class="input-container">
+                <div>Lower X Limit</div>
+                <input type="number" id="lower_x" value="-6" step="0.1">
+            </div>
+            <div class="input-container">
+                <div>Upper X Limit</div>
+                <input type="number" id="upper_x" value="6" step="0.1">
+            </div>
+            <div class="input-container">
+                <div>Lower Y Limit</div>
+                <input type="number" id="lower_y" value="1e-14" step="1e-15">
+            </div>
+            <div class="input-container">
+                <div>Upper Y Limit</div>
+                <input type="number" id="upper_y" value="1e-4" step="1e-5">
+            </div>
+            <div class="input-container">
+                <div>Zoom Level (0-100)</div>
+                <input type="number" id="zoom" value="0" min="0" max="100" step="1">
+            </div>
         </div>
     </div>
 
     <div class="right-panel">
-        <iframe id="plot-frame" class="plot-window" src="about:blank"></iframe>
-    </div>
+        <div class="svg-container">
+            <svg viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid"></svg>
+        </div>
+    </div>    
 </body>
 </html>
-
