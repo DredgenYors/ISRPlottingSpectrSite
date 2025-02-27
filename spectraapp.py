@@ -53,18 +53,14 @@ def plot_page():
 
 @app.route('/update_values', methods=['POST'])
 def update_values():
-    """ Update values dynamically from user input """
     global user_values
-    data = request.json  # Get user input from AJAX request
+    data = request.json
     for key in data:
-        user_values[key] = float(data[key])  # Convert all inputs to float
+        user_values[key] = float(data[key])
     return jsonify({"message": "Values updated"}), 200
 
 @app.route('/plot')
 def plot():
-    """ Generate the plot using the latest user input values """
-    
-    # Load user-defined parameters
     nu_i = user_values["nu_i"]
     nu_e = user_values["nu_e"]
     ni = user_values["ni"]
@@ -77,9 +73,8 @@ def plot():
     epsilon_0 = user_values["epsilon_0"]
     kB = user_values["kB"]
     e = user_values["e"]
-    n_terms = int(user_values["n_terms"])  # Convert to integer
-
-    # Compute necessary values
+    n_terms = int(user_values["n_terms"])
+    
     k_total, k_parallel, k_perpendicular = calculate_wavenumber_components(0.69719, theta)
     vth_i = calculate_thermal_velocity(kB, Te, mi)
     vth_e = calculate_thermal_velocity(kB, Te, me)
@@ -91,37 +86,22 @@ def plot():
     alpha_e = calculate_alpha(k_total, lambda_De)
     c = calculate_sound_speed(kB, Te, Te, mi)
     omega_values = calculate_omega_values(k_total, c)
-
-    # Compute modified distributions and susceptibilities
+    
     U_i = calculate_collisional_term(nu_i, k_parallel, vth_i, k_perpendicular, rho_i, n_terms, omega_values, Oc_i)
     U_e = calculate_collisional_term(nu_e, k_parallel, vth_e, k_perpendicular, rho_e, n_terms, omega_values, Oc_e)
     M_i = calculate_modified_distribution(omega_values, k_parallel, k_perpendicular, vth_i, n_terms, rho_i, Oc_i, nu_i, U_i)
     M_e = calculate_modified_distribution(omega_values, k_parallel, k_perpendicular, vth_e, n_terms, rho_e, Oc_e, nu_e, U_e)
     chi_i = calculate_electric_susceptibility(omega_values, k_parallel, k_perpendicular, vth_i, n_terms, rho_i, Oc_i, nu_i, alpha_e, U_i, Te, Te)
     chi_e = calculate_electric_susceptibility(omega_values, k_parallel, k_perpendicular, vth_e, n_terms, rho_e, Oc_e, nu_e, alpha_e, U_e, Te, Te)
-
-    # Calculate spectra using the updated parameters
+    
     spectra = calcSpectra(M_i, M_e, chi_i, chi_e)
-
-    # Plot the updated spectra
-    fig, ax = plt.subplots(figsize=(10, 6))
-    ax.plot(omega_values / (2 * np.pi * 1e6), spectra, color="b", label=f'Te = {Te} K')
-    ax.set_xlabel('Frequency (MHz)')
-    ax.set_ylabel('Spectra')
-    ax.set_title('Updated Spectra Based on User Input')
-    ax.legend()
-    ax.grid(True)
-    ax.set_yscale('log')
-    ax.set_ylim(1e-14, 1e-4)
-    ax.set_xlim(-6, 6)
-    plt.tight_layout()
-
-    # Save plot to a BytesIO object and send to user
-    img = io.BytesIO()
-    plt.savefig(img, format='png')
-    img.seek(0)
-    plt.close(fig)
-    return send_file(img, mimetype='image/png')
+    
+    data = {
+        "frequencies": (omega_values / (2 * np.pi * 1e6)).tolist(),
+        "spectra": spectra.tolist()
+    }
+    
+    return jsonify(data)
 
 if __name__ == '__main__':
     app.run(debug=True)
