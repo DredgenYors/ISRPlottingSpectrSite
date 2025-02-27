@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask Plot Viewer</title>
+    <title>Live ISR Spectra Plot</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         body {
             display: flex;
@@ -16,8 +18,7 @@
             padding: 10px;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 15px;
+            gap: 10px;
             overflow-y: auto;
         }
         .right-panel {
@@ -27,18 +28,11 @@
             align-items: center;
         }
         .plot-window {
-            width: 90%;
-            height: 90%;
-            border: 1px solid #ccc;
-        }
-        .input-container {
-            width: 90%;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-        input {
             width: 100%;
-            padding: 5px;
+            height: 100%;
+            max-width: 800px;
+            max-height: 600px;
+            border: 1px solid #ccc;
         }
         .button-container {
             display: flex;
@@ -66,134 +60,171 @@
         .reset-btn:hover {
             background-color: #a71d2a;
         }
+        .input-container {
+            margin-bottom: 10px;
+        }
+        .error-message {
+            color: red;
+            font-weight: bold;
+            display: none;
+            margin-top: 10px;
+        }
     </style>
-    <script>
-        const defaultValues = {
-            nu_i: "1.0e-7",
-            nu_e: "1.0e-7",
-            ni: "2.0e11",
-            ne: "2.0e11",
-            mi: "2.65686e-26",
-            me: "9.11e-31",
-            B: "3.6e-5",
-            theta: "60",
-            Te: "500",
-            epsilon_0: "8.854187817e-12",
-            kB: "1.380649e-23",
-            e: "1.602e-19",
-            n_terms: "2000"
-        };
-
-        function generatePlot() {
-            let inputValues = {};
-            for (let key in defaultValues) {
-                inputValues[key] = document.getElementById(key).value;
-            }
-
-            fetch('/update_values', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(inputValues)
-            }).then(response => {
-                if (response.ok) {
-                    document.getElementById("plot-frame").src = "/plot";
-                }
-            });
-        }
-
-        function resetValues() {
-            for (let key in defaultValues) {
-                document.getElementById(key).value = defaultValues[key];
-            }
-
-            fetch('/update_values', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(defaultValues)
-            }).then(response => {
-                if (response.ok) {
-                    document.getElementById("plot-frame").src = "/plot";  // Regenerate plot with defaults
-                }
-            });
-        }
-    </script>
 </head>
 <body>
     <div class="left-panel">
         <div class="button-container">
             <button class="button generate-btn" onclick="generatePlot()">Generate Plot</button>
             <button class="button reset-btn" onclick="resetValues()">Reset</button>
+            <p class="error-message" id="error-message"></p>
         </div>
 
-        <div class="input-container">
-            <div>Ion Collision Frequency [Hz]</div>
-            <input type="text" id="nu_i" placeholder="Ion Collision Frequency" value="1.0e-7">
+        <!-- Upper Section: Non-Constant Parameters -->
+        <div class="param-section">Variable Parameters</div>
+        <div class="param-container" id="variable-params">
+            <div class="input-container">
+                <div>Ion Collision Frequency [Hz]</div>
+                <input type="text" id="nu_i" value="1.0e-7">
+            </div>
+
+            <div class="input-container">
+                <div>Electron Collision Frequency [Hz]</div>
+                <input type="text" id="nu_e" value="1.0e-7">
+            </div>
+
+            <div class="input-container">
+                <div>Ion Density [m⁻³]</div>
+                <input type="text" id="ni" value="2.0e11">
+            </div>
+
+            <div class="input-container">
+                <div>Electron Density [m⁻³]</div>
+                <input type="text" id="ne" value="2.0e11">
+            </div>
+
+            <div class="input-container">
+                <div>Scattering Angle [°]</div>
+                <input type="text" id="theta" value="60">
+            </div>
+
+            <div class="input-container">
+                <div>Electron Temperature [K]</div>
+                <input type="text" id="Te" value="500">
+            </div>
+
+            <div class="input-container">
+                <div>N Terms [unitless]</div>
+                <input type="text" id="n_terms" value="2000">
+            </div>
         </div>
 
-        <div class="input-container">
-            <div>Electron Collision Frequency [Hz]</div>
-            <input type="text" id="nu_e" placeholder="Electron Collision Frequency" value="1.0e-7">
-        </div>
+        <!-- Lower Section: Constant Parameters -->
+        <div class="param-section">Constant Parameters</div>
+        <div class="param-container" id="constant-params">
+            <div class="input-container">
+                <div>Ion Mass [kg]</div>
+                <input type="text" id="mi" value="2.65686e-26">
+            </div>
 
-        <div class="input-container">
-            <div>Ion Density [m⁻³]</div>
-            <input type="text" id="ni" placeholder="Ion Density" value="2.0e11">
-        </div>
+            <div class="input-container">
+                <div>Electron Mass [kg]</div>
+                <input type="text" id="me" value="9.11e-31">
+            </div>
 
-        <div class="input-container">
-            <div>Electron Density [m⁻³]</div>
-            <input type="text" id="ne" placeholder="Electron Density" value="2.0e11">
-        </div>
+            <div class="input-container">
+                <div>Magnetic Field [T]</div>
+                <input type="text" id="B" value="3.6e-5">
+            </div>
 
-        <div class="input-container">
-            <div>Ion Mass [kg]</div>
-            <input type="text" id="mi" placeholder="Ion Mass" value="2.65686e-26">
-        </div>
+            <div class="input-container">
+                <div>Vacuum Permittivity [F/m]</div>
+                <input type="text" id="epsilon_0" value="8.854187817e-12">
+            </div>
 
-        <div class="input-container">
-            <div>Electron Mass [kg]</div>
-            <input type="text" id="me" placeholder="Electron Mass" value="9.11e-31">
-        </div>
+            <div class="input-container">
+                <div>Boltzmann Constant [J/K]</div>
+                <input type="text" id="kB" value="1.380649e-23">
+            </div>
 
-        <div class="input-container">
-            <div>Magnetic Field [T]</div>
-            <input type="text" id="B" placeholder="Magnetic Field" value="3.6e-5">
-        </div>
-
-        <div class="input-container">
-            <div>Scattering Angle [°]</div>
-            <input type="text" id="theta" placeholder="Scattering Angle" value="60">
-        </div>
-
-        <div class="input-container">
-            <div>Electron Temperature [K]</div>
-            <input type="text" id="Te" placeholder="Electron Temperature" value="500">
-        </div>
-
-        <div class="input-container">
-            <div>Vacuum Permittivity [F/m]</div>
-            <input type="text" id="epsilon_0" placeholder="Vacuum Permittivity" value="8.854187817e-12">
-        </div>
-
-        <div class="input-container">
-            <div>Boltzmann Constant [J/K]</div>
-            <input type="text" id="kB" placeholder="Boltzmann Constant" value="1.380649e-23">
-        </div>
-
-        <div class="input-container">
-            <div>Elementary Charge [C]</div>
-            <input type="text" id="e" placeholder="Elementary Charge" value="1.602e-19">
-        </div>
-
-        <div class="input-container">
-            <div>N Terms [unitless]</div>
-            <input type="text" id="n_terms" placeholder="N Terms" value="2000">
+            <div class="input-container">
+                <div>Elementary Charge [C]</div>
+                <input type="text" id="e" value="1.602e-19">
+            </div>
         </div>
     </div>
-
     <div class="right-panel">
-        <iframe id="plot-frame" class="plot-window" src="about:blank"></iframe>
+        <div id="plot" class="plot-window"></div>
     </div>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            if (typeof Plotly === 'undefined') {
+                console.error("Plotly failed to load.");
+            } else {
+                generatePlot();
+            }
+        });
+
+        function generatePlot() {
+            let newValues = {};
+            document.querySelectorAll("input").forEach(input => {
+                newValues[input.id] = parseFloat(input.value);
+            });
+
+            fetch('/update_values', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newValues)
+            })
+            .then(response => response.json())
+            .then(() => fetch('/plot'))
+            .then(response => response.json())
+            .then(data => {
+                console.log("Received Data:", data);
+                if (!data.frequencies || !data.spectra) {
+                    throw new Error("Missing data for plot");
+                }
+                
+                let trace = {
+                    x: data.frequencies,
+                    y: data.spectra,
+                    mode: 'lines',
+                    name: 'ISR Spectra'
+                };
+                let layout = {
+                    title: 'ISR Spectra for Different Electron Temperatures',
+                    xaxis: { title: 'Frequency (MHz)' },
+                    yaxis: { title: 'Spectra', type: 'log' },
+                    hovermode: 'x unified',
+                    autosize: true
+                };
+                Plotly.newPlot('plot', [trace], layout, { responsive: true });
+
+                // Hide error message if plot generation is successful
+                document.getElementById("error-message").style.display = "none";
+            })
+            .catch(error => {
+                console.error("Error generating plot:", error);
+        
+                // Display error message to user
+                let errorMessage = document.getElementById("error-message");
+                errorMessage.textContent = "An error occurred while generating the plot. Resetting to default values...";
+                errorMessage.style.display = "block";
+
+                // Automatically reset values and try again
+                setTimeout(() => {
+                    resetValues();
+                }, 500); // Add a short delay before resetting
+            });
+        }
+
+        function resetValues() {
+            document.querySelectorAll("input").forEach(input => {
+                input.value = input.defaultValue;
+            });
+            generatePlot();
+        }
+    </script>
 </body>
 </html>
 
