@@ -36,6 +36,27 @@ user_values = {
     "n_terms": 2000
 }
 
+parameter_profiles = {
+    "button1": {
+        "nu_i": 1.0e-7, "nu_e": 1.0e-7, "ni": 2.0e11, "ne": 2.0e11,
+        "mi": 2.65686e-26, "me": 9.11e-31, "B": 3.6e-5, "theta": 60,
+        "Te": 500, "epsilon_0": 8.854187817e-12, "kB": 1.380649e-23,
+        "e": 1.602e-19, "n_terms": 2000
+    },
+    "button2": {
+        "nu_i": 5.0e-7, "nu_e": 5.0e-7, "ni": 1.0e11, "ne": 1.0e11,
+        "mi": 4.0e-26, "me": 9.11e-31, "B": 4.0e-5, "theta": 45,
+        "Te": 1500, "epsilon_0": 8.854187817e-12, "kB": 1.380649e-23,
+        "e": 1.602e-19, "n_terms": 2000
+    },
+    "button3": {
+        "nu_i": 1.0e-6, "nu_e": 1.0e-6, "ni": 5.0e10, "ne": 5.0e10,
+        "mi": 3.0e-26, "me": 9.11e-31, "B": 5.0e-5, "theta": 30,
+        "Te": 2500, "epsilon_0": 8.854187817e-12, "kB": 1.380649e-23,
+        "e": 1.602e-19, "n_terms": 2000
+    }
+}
+
 @app.route('/')
 def home():
     """ Render the main landing page: index.html """
@@ -103,6 +124,23 @@ def plot():
     
     return jsonify(data)
 
+@app.route('/set_profile', methods=['POST'])
+def set_profile():
+    global user_values
+    data = request.json
+    profile_name = data.get("profile")
+    if profile_name in parameter_profiles:
+        user_values.update(parameter_profiles[profile_name])
+        return jsonify({"message": f"Profile {profile_name} applied"}), 200
+    return jsonify({"error": "Invalid profile"}), 400
+
+@app.route('/get_profile', methods=['POST'])
+def get_profile():
+    data = request.json
+    profile_name = data.get("profile")
+    if profile_name in parameter_profiles:
+        return jsonify(parameter_profiles[profile_name]), 200
+    return jsonify({"error": "Invalid profile"}), 400
+
 if __name__ == '__main__':
     app.run(debug=True)
-
