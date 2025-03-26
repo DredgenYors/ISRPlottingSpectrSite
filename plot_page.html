@@ -7,7 +7,9 @@
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
+        /* Apply San Francisco Pro font to the entire page */
         body {
+            font-family: "San Francisco Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             display: flex;
             height: 100vh;
             margin: 0;
@@ -19,25 +21,28 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            overflow-y: auto;
+            overflow-y: hidden;
+            border-right: 1px solid black; /* Add a thin vertical black line */
+            font-family: inherit; /* Inherit font from body */
         }
         .right-panel {
             width: 75%;
             display: flex;
             justify-content: center;
             align-items: center;
+            font-family: inherit; /* Inherit font from body */
         }
         .plot-window {
-            width: 100%;
-            height: 100%;
-            max-width: 800px;
-            max-height: 600px;
+            width: 90%; /* Increase width to take up more space */
+            height: 90%; /* Increase height to take up more space */
+            max-width: 1000px; /* Adjust maximum width */
+            max-height: 800px; /* Adjust maximum height */
             border: 1px solid #ccc;
         }
         .button-container {
             display: flex;
             gap: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 5px; /* Decrease space below the row of generate/reset buttons */
         }
         .button {
             padding: 10px 20px;
@@ -47,6 +52,7 @@
             border: none;
             border-radius: 5px;
             transition: background-color 0.3s;
+            font-family: inherit; /* Inherit font from body */
         }
         .generate-btn {
             background-color: #007BFF;
@@ -61,124 +67,145 @@
             background-color: #a71d2a;
         }
         .input-container {
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
         .error-message {
-            color: red;
-            font-weight: bold;
             display: none;
-            margin-top: 10px;
+            margin-left: 10px; /* Position to the right of the reset button */
+            color: red;
+            font-size: 0.9em;
+            font-weight: bold;
         }
         .matrix-button {
-        width: 100px;
-        height: 50px;
-        border: 2px solid black;
-        font-weight: bold;
-        cursor: pointer;
-        background-color: lightgray;
+            width: 100px;
+            height: 50px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            background-color: #6c757d; /* Default gray color */
+            transition: background-color 0.3s;
+            margin-bottom: 5px;
+            font-family: inherit; /* Inherit font from body */
         }
-
+        .matrix-button:hover {
+            background-color: #5a6268; /* Darker gray on hover */
+        }
         .blue-button {
-        background-color: blue !important;
-        color: white;
+            background-color: #007BFF !important; /* Match "Generate Plot" button */
         }
-
-        .red-button {
-        background-color: red !important;
-        color: white;
+        .blue-button:hover {
+            background-color: #0056b3 !important; /* Match "Generate Plot" hover */
+        }
+        .toggle-button {
+            padding: 5px 15px; /* Decrease size of toggle buttons */
+            font-size: 0.9em; /* Adjust font size */
+            cursor: pointer;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            background-color: #28a745; /* Green color for toggle buttons */
+            transition: background-color 0.3s;
+            margin-left: 5px; /* Add space between toggle buttons */
+            font-family: inherit; /* Inherit font from body */
+        }
+        .toggle-button:hover {
+            background-color: #218838; /* Darker green on hover */
+        }
+        .param-container, .input-container div, input {
+            font-family: inherit; /* Ensure parameter sections use the new font */
+        }
+        .loading-message {
+            display: none;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            z-index: 1000;
         }
     </style>
 </head>
 <body>
     <div class="left-panel">
         <div class="button-container">
-            <button class="button generate-btn" onclick="generatePlot()">Generate Plot</button>
+            <button class="button generate-btn">Generate Plot</button>
             <button class="button reset-btn" onclick="resetValues()">Reset</button>
-            <p class="error-message" id="error-message"></p>
+            <span id="error-message" class="error-message">Error: Something went wrong!</span>
+            <div id="loading-message" class="loading-message">Generating plot, please wait...</div>
         </div>
-
-        <div style="display: flex; justify-content: space-around; margin-top: 20px;">
+        <div class="profile-row">
             <div>
-                <button class="matrix-button blue-button">Button 1</button>
-                <button onclick="toggleVisibility(0)">Toggle Profile 1</button>
+                <button class="matrix-button blue-button">Plot 1</button>
+                <button class="toggle-button" onclick="toggleVisibility(0)">Toggle Plot 1</button>
             </div>
             <div>
-                <button class="matrix-button">Button 2</button>
-                <button onclick="toggleVisibility(1)">Toggle Profile 2</button>
+                <button class="matrix-button">Plot 2</button>
+                <button class="toggle-button" onclick="toggleVisibility(1)">Toggle Plot 2</button>
             </div>
             <div>
-                <button class="matrix-button">Button 3</button>
-                <button onclick="toggleVisibility(2)">Toggle Profile 3</button>
+                <button class="matrix-button">Plot 3</button>
+                <button class="toggle-button" onclick="toggleVisibility(2)">Toggle Plot 3</button>
             </div>
-        </div>        
-
-        <!-- Upper Section: Non-Constant Parameters -->
+        </div>
         <div class="param-section">Variable Parameters</div>
         <div class="param-container" id="variable-params">
             <div class="input-container">
                 <div>Ion Collision Frequency [Hz]</div>
                 <input type="text" id="nu_i" value="1.0e-7">
             </div>
-
             <div class="input-container">
                 <div>Electron Collision Frequency [Hz]</div>
                 <input type="text" id="nu_e" value="1.0e-7">
             </div>
-
             <div class="input-container">
                 <div>Ion Density [m⁻³]</div>
                 <input type="text" id="ni" value="2.0e11">
             </div>
-
             <div class="input-container">
                 <div>Electron Density [m⁻³]</div>
                 <input type="text" id="ne" value="2.0e11">
             </div>
-
             <div class="input-container">
                 <div>Scattering Angle [°]</div>
                 <input type="text" id="theta" value="60">
             </div>
-
             <div class="input-container">
                 <div>Electron Temperature [K]</div>
                 <input type="text" id="Te" value="500">
             </div>
-
             <div class="input-container">
-                <div>N Terms [unitless]</div>
-                <input type="text" id="n_terms" value="2000">
+                <div>N Terms [unitless] <i style="font-size: smaller;">odd values will center the plot at 0</i></div>
+                <input type="text" id="n_terms" value="2001">
             </div>
         </div>
-
-        <!-- Lower Section: Constant Parameters -->
-        <div class="param-section">Constant Parameters</div>
+        <div class="param-section"> Constant Parameters  <i style="font-size: smaller;"> <i>these values should not be changed</i></i></div>
         <div class="param-container" id="constant-params">
             <div class="input-container">
                 <div>Ion Mass [kg]</div>
                 <input type="text" id="mi" value="2.65686e-26">
             </div>
-
             <div class="input-container">
                 <div>Electron Mass [kg]</div>
                 <input type="text" id="me" value="9.11e-31">
             </div>
-
             <div class="input-container">
                 <div>Magnetic Field [T]</div>
                 <input type="text" id="B" value="3.6e-5">
             </div>
-
             <div class="input-container">
                 <div>Vacuum Permittivity [F/m]</div>
                 <input type="text" id="epsilon_0" value="8.854187817e-12">
             </div>
-
             <div class="input-container">
                 <div>Boltzmann Constant [J/K]</div>
                 <input type="text" id="kB" value="1.380649e-23">
             </div>
-
             <div class="input-container">
                 <div>Elementary Charge [C]</div>
                 <input type="text" id="e" value="1.602e-19">
@@ -188,139 +215,167 @@
     <div class="right-panel">
         <div id="plot" class="plot-window"></div>
     </div>
-    
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            let selectedProfile = "button1"; // Default to Button 1
-            let plotData = []; // Store all plots
-            let visibility = { "button1": true, "button2": true, "button3": true }; // Track visibility state
-    
-            const buttons = document.querySelectorAll(".matrix-button");
-            buttons.forEach(button => {
-                button.addEventListener("click", function () {
-                    buttons.forEach(btn => btn.classList.remove("blue-button"));
-                    this.classList.add("blue-button");
-    
-                    if (this.textContent.includes("1")) {
-                        selectedProfile = "button1";
-                    } else if (this.textContent.includes("2")) {
-                        selectedProfile = "button2";
-                    } else if (this.textContent.includes("3")) {
-                        selectedProfile = "button3";
-                    }
-    
-                    console.log(`Profile ${selectedProfile} selected, updating input fields.`);
-    
-                    fetch('/get_profile', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ profile: selectedProfile })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        for (let key in data) {
-                            if (document.getElementById(key)) {
-                                document.getElementById(key).value = data[key];
-                            }
-                        }
-                    })
-                    .catch(error => console.error("Error fetching profile data:", error));
-                });
-            });
-    
-            function generatePlot() {
-                console.log(`Generating plot for profile: ${selectedProfile}`);
-    
-                let newValues = {};
-                document.querySelectorAll("input").forEach(input => {
-                    newValues[input.id] = parseFloat(input.value);
-                });
-    
-                fetch('/update_values', {
+        let selectedProfile = "Plot1"; // Default to Button 1
+        let plotData = []; // Store all plots
+        let visibility = { "Plot1": true, "Plot2": true, "Plot3": true }; // Track visibility state
+
+        const buttons = document.querySelectorAll(".matrix-button");
+        buttons.forEach(button => {
+            button.addEventListener("click", function () {
+                buttons.forEach(btn => btn.classList.remove("blue-button"));
+                this.classList.add("blue-button");
+
+                if (this.textContent.includes("1")) {
+                    selectedProfile = "Plot1";
+                } else if (this.textContent.includes("2")) {
+                    selectedProfile = "Plot2";
+                } else if (this.textContent.includes("3")) {
+                    selectedProfile = "Plot3";
+                }
+
+                console.log(`Profile ${selectedProfile} selected, updating input fields.`);
+
+                fetch('/get_profile', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(newValues)
+                    body: JSON.stringify({ profile: selectedProfile })
                 })
-                .then(() => fetch('/plot'))
                 .then(response => response.json())
                 .then(data => {
-                    console.log("Received Data:", data);
-    
-                    let colors = { "button1": "blue", "button2": "red", "button3": "green" };
-    
-                    let trace = {
-                        x: data.frequencies,
-                        y: data.spectra,
-                        mode: 'lines',
-                        name: `Profile ${selectedProfile}`,
-                        line: { color: colors[selectedProfile] },
-                        visible: visibility[selectedProfile] ? true : "legendonly"
-                    };
-    
-                    // Check if the profile already exists in the plot
-                    let existingTraceIndex = plotData.findIndex(t => t.name === `Profile ${selectedProfile}`);
-                    if (existingTraceIndex !== -1) {
-                        plotData[existingTraceIndex] = trace; // Update existing plot
-                    } else {
-                        plotData.push(trace); // Add new plot
+                    for (let key in data) {
+                        if (document.getElementById(key)) {
+                            document.getElementById(key).value = data[key];
+                        }
                     }
-    
-                    let layout = {
-                        title: 'ISR Spectra Comparison',
-                        xaxis: { title: 'Frequency (MHz)' },
-                        yaxis: { title: 'Spectra', type: 'log' },
-                        hovermode: 'x unified',
-                        autosize: true
-                    };
-    
-                    Plotly.newPlot('plot', plotData, layout, { responsive: true });
-    
-                    console.log("Plot successfully generated!");
+                })
+                .catch(error => {
+                    console.error("Error fetching profile data:", error);
+                    alert(`Error fetching data for Profile ${selectedProfile}. Please try again.`);
                 });
-            }
-    
-            // Visibility toggle logic
-        function toggleVisibility(profileIndex) {
-            // Get the current visibility of the profile
-            var currentVisibility = plotData[profileIndex].visible;
+            });
+        });
 
-            // Toggle visibility
-            plotData[profileIndex].visible = currentVisibility === true ? 'legendonly' : true;
+        function generatePlot() {
+            const loadingMessage = document.getElementById("loading-message");
+            const errorMessage = document.getElementById("error-message");
+            loadingMessage.style.display = "block"; // Show the loading message
+            errorMessage.style.display = "none"; // Hide the error message
 
-            // Update the plot to reflect the change
-            Plotly.update('plot', plotData, {}, [profileIndex]);
-        }
+            console.log(`Generating plot for profile: ${selectedProfile}`);
 
-            document.querySelector(".generate-btn").addEventListener("click", generatePlot);
-    
-            // Load Button 1's default parameters on page load
-            fetch('/get_profile', {
+            let newValues = {};
+            document.querySelectorAll("input").forEach(input => {
+                newValues[input.id] = parseFloat(input.value);
+            });
+
+            fetch('/update_values', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ profile: "button1" })
+                body: JSON.stringify(newValues)
             })
+            .then(() => fetch('/plot'))
             .then(response => response.json())
             .then(data => {
-                for (let key in data) {
-                    if (document.getElementById(key)) {
-                        document.getElementById(key).value = data[key];
-                    }
+                console.log("Received Data:", data);
+
+                let colors = { "Plot 1": "blue", "Plot 2": "red", "Plot 3": "green" };
+
+                let trace = {
+                    x: data.frequencies,
+                    y: data.spectra,
+                    mode: 'lines',
+                    name: selectedProfile,
+                    line: { color: colors[selectedProfile] },
+                    visible: visibility[selectedProfile] ? true : "legendonly"
+                };
+
+                let existingTraceIndex = plotData.findIndex(t => t.name === selectedProfile);
+                if (existingTraceIndex !== -1) {
+                    plotData[existingTraceIndex] = trace;
+                } else {
+                    plotData.push(trace);
                 }
+
+                let layout = {
+                    title: 'Spectra',
+                    xaxis: { title: 'Frequency (MHz)' },
+                    yaxis: { title: 'Spectra', type: 'log' },
+                    hovermode: 'x unified',
+                    autosize: true
+                };
+
+                Plotly.newPlot('plot', plotData, layout, { responsive: true });
+
+                console.log("Plot successfully generated!");
             })
-            .catch(error => console.error("Error loading default profile data:", error));
+            .catch(error => {
+                console.error("Error generating plot:", error);
+                errorMessage.textContent = `Error generating plot for ${selectedProfile}. Please check your inputs and try again.`;
+                errorMessage.style.display = "inline"; // Show the error message
+            })
+            .finally(() => {
+                loadingMessage.style.display = "none"; // Hide the loading message
+            });
+        }
+
+        function toggleVisibility(profileIndex) {
+            const profileNames = ["Plot1", "Plot2", "Plot3"]; // Map indices to profile names
+            const profileName = profileNames[profileIndex]; // Get the profile name for the given index
+
+            // Check if the plot data exists for the given profile name
+            const traceIndex = plotData.findIndex(t => t.name === profileName);
+            if (traceIndex !== -1) {
+                // Toggle visibility between true and 'legendonly'
+                plotData[traceIndex].visible = plotData[traceIndex].visible === true ? 'legendonly' : true;
+
+                // Define the layout to preserve the original plot appearance
+                const layout = {
+                    title: 'ISR Spectra Comparison',
+                    xaxis: { title: 'Frequency (MHz)' },
+                    yaxis: { title: 'Spectra', type: 'log' },
+                    hovermode: 'x unified',
+                    autosize: true
+                };
+
+                // Re-render the plot with the updated data and layout
+                Plotly.react('plot', plotData, layout, { responsive: true });
+            } else {
+                console.warn(`No plot data found for profile: ${profileName}. Generate the plot first.`);
+                alert(`No plot data found for ${profileName}. Please generate the plot first.`);
+            }
+        }
+
+        document.querySelector(".generate-btn").addEventListener("click", generatePlot);
+
+        fetch('/get_profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ profile: "Plot1" })
+        })
+        .then(response => response.json())
+        .then(data => {
+            for (let key in data) {
+                if (document.getElementById(key)) {
+                    document.getElementById(key).value = data[key];
+                }
+            }
+        })
+        .catch(error => {
+            console.error("Error loading default profile data:", error);
+            alert("Error loading default profile data. Please refresh the page and try again.");
         });
 
         function resetValues() {
-            // Profile data for each button
             const profileData = {
-                "button1": {
+                "Plot1": {
                     nu_i: "1.0e-7",
                     nu_e: "1.0e-7",
                     ni: "2.0e11",
                     ne: "2.0e11",
                     theta: "60",
                     Te: "500",
-                    n_terms: "2000",
+                    n_terms: "2001",
                     mi: "2.65686e-26",
                     me: "9.11e-31",
                     B: "3.6e-5",
@@ -328,14 +383,14 @@
                     kB: "1.380649e-23",
                     e: "1.602e-19"
                 },
-                "button2": {
+                "Plot2": {
                     nu_i: "2.0e-7",
                     nu_e: "2.0e-7",
                     ni: "2.5e11",
                     ne: "2.5e11",
                     theta: "70",
                     Te: "1000",
-                    n_terms: "3000",
+                    n_terms: "3001",
                     mi: "2.75686e-26",
                     me: "1.01e-30",
                     B: "4.0e-5",
@@ -343,14 +398,14 @@
                     kB: "1.480649e-23",
                     e: "1.702e-19"
                 },
-                "button3": {
+                "Plot3": {
                     nu_i: "3.0e-7",
                     nu_e: "3.0e-7",
                     ni: "3.0e11",
                     ne: "3.0e11",
                     theta: "80",
                     Te: "1500",
-                    n_terms: "4000",
+                    n_terms: "4001",
                     mi: "3.65686e-26",
                     me: "1.11e-30",
                     B: "4.5e-5",
@@ -359,9 +414,8 @@
                     e: "1.802e-19"
                 }
             };
-            let selectedProfile = "button1";
+            let selectedProfile = "Plot1";
             console.log("Resetting values for profile:", selectedProfile);
-            // Reset the input fields to the selected profile's values
             const profile = profileData[selectedProfile];
             for (let key in profile) {
                 if (document.getElementById(key)) {
@@ -369,6 +423,8 @@
                 }
             }
         }
-    </script>       
+
+        
+    </script>
 </body>
 </html>
