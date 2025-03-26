@@ -33,27 +33,27 @@ user_values = {
     "epsilon_0": 8.854187817e-12,
     "kB": 1.380649e-23,
     "e": 1.602e-19,
-    "n_terms": 2000
+    "n_terms": 2001
 }
 
 parameter_profiles = {
-    "button1": {
+    "Plot 1": {  # Renamed from "button1"
         "nu_i": 1.0e-7, "nu_e": 1.0e-7, "ni": 2.0e11, "ne": 2.0e11,
         "mi": 2.65686e-26, "me": 9.11e-31, "B": 3.6e-5, "theta": 60,
         "Te": 500, "epsilon_0": 8.854187817e-12, "kB": 1.380649e-23,
-        "e": 1.602e-19, "n_terms": 2000
+        "e": 1.602e-19, "n_terms": 2001
     },
-    "button2": {
+    "Plot 2": {  # Renamed from "button2"
         "nu_i": 5.0e-7, "nu_e": 5.0e-7, "ni": 1.0e11, "ne": 1.0e11,
         "mi": 4.0e-26, "me": 9.11e-31, "B": 4.0e-5, "theta": 45,
         "Te": 1500, "epsilon_0": 8.854187817e-12, "kB": 1.380649e-23,
-        "e": 1.602e-19, "n_terms": 2000
+        "e": 1.602e-19, "n_terms": 2001
     },
-    "button3": {
+    "Plot 3": {  # Renamed from "button3"
         "nu_i": 1.0e-6, "nu_e": 1.0e-6, "ni": 5.0e10, "ne": 5.0e10,
         "mi": 3.0e-26, "me": 9.11e-31, "B": 5.0e-5, "theta": 30,
         "Te": 2500, "epsilon_0": 8.854187817e-12, "kB": 1.380649e-23,
-        "e": 1.602e-19, "n_terms": 2000
+        "e": 1.602e-19, "n_terms": 2001
     }
 }
 
@@ -129,7 +129,7 @@ def set_profile():
     global user_values
     data = request.json
     profile_name = data.get("profile")
-    if profile_name in parameter_profiles:
+    if profile_name in parameter_profiles:  # Updated to use new profile names
         user_values.update(parameter_profiles[profile_name])
         return jsonify({"message": f"Profile {profile_name} applied"}), 200
     return jsonify({"error": "Invalid profile"}), 400
@@ -138,7 +138,7 @@ def set_profile():
 def get_profile():
     data = request.json
     profile_name = data.get("profile")
-    if profile_name in parameter_profiles:
+    if profile_name in parameter_profiles:  # Updated to use new profile names
         return jsonify(parameter_profiles[profile_name]), 200
     return jsonify({"error": "Invalid profile"}), 400
 
