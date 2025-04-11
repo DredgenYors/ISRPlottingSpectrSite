@@ -21,9 +21,28 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            overflow-y: hidden;
+            overflow-y: auto; /* Enable vertical scrolling */
+            direction: rtl; /* Reverse the direction to move the scrollbar to the left */
             border-right: 1px solid black; /* Add a thin vertical black line */
             font-family: inherit; /* Inherit font from body */
+        }
+        .left-panel * {
+            direction: ltr; /* Ensure the content inside the panel remains left-to-right */
+        }
+        .left-panel::-webkit-scrollbar {
+            width: 10px; /* Width of the scrollbar */
+        }
+        .left-panel::-webkit-scrollbar-track {
+            background: #f4f4f4; /* Background of the scrollbar track */
+            border-radius: 5px; /* Rounded corners for the track */
+        }
+        .left-panel::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.5); /* Decrease opacity for more transparency */
+            border-radius: 5px; /* Rounded corners for the thumb */
+            border: 2px solid #f4f4f4; /* Border remains the same */
+        }
+        .left-panel::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.7); /* Slightly less transparent on hover */
         }
         .right-panel {
             width: 75%;
@@ -39,6 +58,13 @@
             max-height: 800px; /* Adjust maximum height */
             border: 1px solid #ccc;
         }
+        .plot-data {
+            opacity: 0; /* Start hidden */
+            transition: opacity 1s ease-in-out; /* Add fade-in transition */
+        }
+        .plot-data.visible {
+            opacity: 1; /* Make visible */
+        }
         .button-container {
             display: flex;
             gap: 10px;
@@ -46,7 +72,10 @@
         }
         .button {
             padding: 10px 20px;
-            font-size: 1.1em;
+            font-size: 1.1em; /* Match font size of plot buttons */
+            font-weight: bold; /* Match bold text style of plot buttons */
+            text-transform: uppercase; /* Ensure text is uppercase like plot buttons */
+            letter-spacing: 1px; /* Add spacing between letters for consistency */
             cursor: pointer;
             color: white;
             border: none;
@@ -129,6 +158,147 @@
             font-size: 0.9em;
             z-index: 1000;
         }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column; /* Stack panels vertically */
+            }
+            .left-panel {
+                width: 100%; /* Full width for smaller screens */
+                height: auto; /* Adjust height automatically */
+                border-right: none; /* Remove vertical line */
+                border-bottom: 1px solid black; /* Add horizontal line */
+            }
+            .right-panel {
+                width: 100%; /* Full width for smaller screens */
+                height: auto; /* Adjust height automatically */
+            }
+            .plot-window {
+                width: 100%; /* Full width for smaller screens */
+                height: 300px; /* Adjust height for smaller screens */
+            }
+            .button-container {
+                flex-wrap: wrap; /* Allow buttons to wrap to the next line */
+                justify-content: center; /* Center buttons */
+            }
+            .matrix-button, .toggle-button {
+                width: 45%; /* Adjust button width for smaller screens */
+                margin: 5px auto; /* Add margin for spacing */
+            }
+            .param-container {
+                display: flex;
+                flex-direction: column; /* Stack input containers vertically */
+                gap: 10px; /* Add spacing between input containers */
+            }
+            .input-container {
+                width: 100%; /* Ensure input containers take full width */
+            }
+        }
+
+        /* For screens larger than 1200px */
+        @media (min-width: 1200px) {
+            .left-panel {
+                width: 20%; /* Reduce left panel width */
+            }
+            .right-panel {
+                width: 80%; /* Increase right panel width */
+            }
+            .plot-window {
+                width: 95%; /* Slightly increase plot window width */
+                height: 95%; /* Slightly increase plot window height */
+            }
+        }
+
+        /* For screens between 768px and 1200px */
+        @media (min-width: 768px) and (max-width: 1200px) {
+            .left-panel {
+                width: 25%; /* Adjust left panel width */
+            }
+            .right-panel {
+                width: 75%; /* Adjust right panel width */
+            }
+            .plot-window {
+                width: 90%; /* Adjust plot window width */
+                height: 90%; /* Adjust plot window height */
+            }
+        }
+
+        /* For screens smaller than 768px */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column; /* Stack panels vertically */
+            }
+            .left-panel {
+                width: 100%; /* Full width for smaller screens */
+                height: auto; /* Adjust height automatically */
+                border-right: none; /* Remove vertical line */
+                border-bottom: 1px solid black; /* Add horizontal line */
+            }
+            .right-panel {
+                width: 100%; /* Full width for smaller screens */
+                height: auto; /* Adjust height automatically */
+            }
+            .plot-window {
+                width: 100%; /* Full width for smaller screens */
+                height: 300px; /* Adjust height for smaller screens */
+            }
+            .button-container {
+                flex-wrap: wrap; /* Allow buttons to wrap to the next line */
+                justify-content: center; /* Center buttons */
+            }
+            .matrix-button, .toggle-button {
+                width: 45%; /* Adjust button width for smaller screens */
+                margin: 5px auto; /* Add margin for spacing */
+            }
+        }
+
+        /* For screens smaller than 480px */
+        @media (max-width: 480px) {
+            .left-panel {
+                width: 100%; /* Full width for very small screens */
+                padding: 5px; /* Reduce padding */
+            }
+            .right-panel {
+                width: 100%; /* Full width for very small screens */
+            }
+            .plot-window {
+                height: 250px; /* Further reduce plot height */
+            }
+            .button-container {
+                flex-direction: column; /* Stack buttons vertically */
+                gap: 5px; /* Reduce gap between buttons */
+            }
+            .matrix-button, .toggle-button {
+                width: 100%; /* Full width for buttons */
+            }
+            .param-container {
+                gap: 5px; /* Reduce spacing between input containers */
+            }
+            .input-container {
+                width: 100%; /* Ensure input containers take full width */
+            }
+        }
+        .param-section {
+            font-size: 1.2em; /* Increase font size */
+            font-weight: bold; /* Make text bold */
+        }
+        input[type="text"] {
+            width: 80%; /* Decrease width to 80% of the container */
+            padding: 8px 10px; /* Add padding for better usability */
+            font-size: 1em; /* Adjust font size */
+            border: 1px solid #ccc; /* Add a light border */
+            border-radius: 5px; /* Rounded corners */
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); /* Subtle inner shadow */
+            transition: border-color 0.3s, box-shadow 0.3s; /* Smooth transition for focus */
+            font-family: inherit; /* Match font with the rest of the page */
+        }
+
+        input[type="text"]:focus {
+            border-color: #007BFF; /* Highlight border on focus */
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Add glow effect on focus */
+            outline: none; /* Remove default outline */
+        }
+        
     </style>
 </head>
 <body>
@@ -184,7 +354,7 @@
                 <input type="text" id="n_terms" value="2001">
             </div>
         </div>
-        <div class="param-section"> Constant Parameters  <i style="font-size: smaller;"> <i>these values should not be changed</i></i></div>
+        <div class="param-section"> Constant Parameters  <i style="font-size: smaller;"></i></div>
         <div class="param-container" id="constant-params">
             <div class="input-container">
                 <div>Ion Mass [kg]</div>
@@ -213,12 +383,17 @@
         </div>
     </div>
     <div class="right-panel">
-        <div id="plot" class="plot-window"></div>
+        <div id="plot" class="plot-window plot-data"></div>
     </div>
     <script>
+        window.onload = function () {
+            const plotElement = document.getElementById("plot");
+        };
+
         let selectedProfile = "Plot1"; // Default to Button 1
         let plotData = []; // Store all plots
         let visibility = { "Plot1": true, "Plot2": true, "Plot3": true }; // Track visibility state
+        let firstPlotGenerated = false; // Track if the first plot has been generated
 
         const buttons = document.querySelectorAll(".matrix-button");
         buttons.forEach(button => {
@@ -257,67 +432,73 @@
         });
 
         function generatePlot() {
-            const loadingMessage = document.getElementById("loading-message");
-            const errorMessage = document.getElementById("error-message");
-            loadingMessage.style.display = "block"; // Show the loading message
-            errorMessage.style.display = "none"; // Hide the error message
+    const plotElement = document.getElementById("plot");
+    const loadingMessage = document.getElementById("loading-message");
+    const errorMessage = document.getElementById("error-message");
 
-            console.log(`Generating plot for profile: ${selectedProfile}`);
+    loadingMessage.style.display = "block"; // Show the loading message
+    errorMessage.style.display = "none"; // Hide the error message
 
-            let newValues = {};
-            document.querySelectorAll("input").forEach(input => {
-                newValues[input.id] = parseFloat(input.value);
-            });
+    const currentProfile = selectedProfile;
 
-            fetch('/update_values', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newValues)
-            })
-            .then(() => fetch('/plot'))
-            .then(response => response.json())
-            .then(data => {
-                console.log("Received Data:", data);
+    console.log(`Generating plot for profile: ${currentProfile}`);
 
-                let colors = { "Plot 1": "blue", "Plot 2": "red", "Plot 3": "green" };
+    let newValues = {};
+    document.querySelectorAll("input").forEach(input => {
+        newValues[input.id] = parseFloat(input.value);
+    });
 
-                let trace = {
-                    x: data.frequencies,
-                    y: data.spectra,
-                    mode: 'lines',
-                    name: selectedProfile,
-                    line: { color: colors[selectedProfile] },
-                    visible: visibility[selectedProfile] ? true : "legendonly"
-                };
+    fetch('/update_values', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newValues)
+    })
+    .then(() => fetch('/plot'))
+    .then(response => response.json())
+    .then(data => {
+        console.log("Received Data:", data);
 
-                let existingTraceIndex = plotData.findIndex(t => t.name === selectedProfile);
-                if (existingTraceIndex !== -1) {
-                    plotData[existingTraceIndex] = trace;
-                } else {
-                    plotData.push(trace);
-                }
+        let colors = { "Plot 1": "blue", "Plot 2": "red", "Plot 3": "green" };
 
-                let layout = {
-                    title: 'Spectra',
-                    xaxis: { title: 'Frequency (MHz)' },
-                    yaxis: { title: 'Spectra', type: 'log' },
-                    hovermode: 'x unified',
-                    autosize: true
-                };
+        let trace = {
+            x: data.frequencies,
+            y: data.spectra,
+            mode: 'lines',
+            name: currentProfile,
+            line: { color: colors[currentProfile] },
+            visible: visibility[currentProfile] ? true : "legendonly"
+        };
 
-                Plotly.newPlot('plot', plotData, layout, { responsive: true });
-
-                console.log("Plot successfully generated!");
-            })
-            .catch(error => {
-                console.error("Error generating plot:", error);
-                errorMessage.textContent = `Error generating plot for ${selectedProfile}. Please check your inputs and try again.`;
-                errorMessage.style.display = "inline"; // Show the error message
-            })
-            .finally(() => {
-                loadingMessage.style.display = "none"; // Hide the loading message
-            });
+        let existingTraceIndex = plotData.findIndex(t => t.name === currentProfile);
+        if (existingTraceIndex !== -1) {
+            plotData[existingTraceIndex] = trace;
+        } else {
+            plotData.push(trace);
         }
+
+        let layout = {
+            title: 'Backscatter Spectra',
+            xaxis: { title: 'Frequency (MHz)' },
+            yaxis: { title: 'Spectra', type: 'log' },
+            hovermode: 'x unified',
+            autosize: true
+        };
+
+        Plotly.newPlot('plot', plotData, layout, { responsive: true });
+
+        // Apply fade-in effect
+        plotElement.classList.add('visible');
+        console.log("Added 'visible' class to plot element.");
+    })
+    .catch(error => {
+        console.error("Error generating plot:", error);
+        errorMessage.textContent = `Error generating plot. Please check your inputs and try again.`;
+        errorMessage.style.display = "inline"; // Show the error message
+    })
+    .finally(() => {
+        loadingMessage.style.display = "none"; // Hide the loading message
+    });
+}
 
         function toggleVisibility(profileIndex) {
             const profileNames = ["Plot1", "Plot2", "Plot3"]; // Map indices to profile names
@@ -331,7 +512,7 @@
 
                 // Define the layout to preserve the original plot appearance
                 const layout = {
-                    title: 'ISR Spectra Comparison',
+                    title: 'Backscatter Spectra',
                     xaxis: { title: 'Frequency (MHz)' },
                     yaxis: { title: 'Spectra', type: 'log' },
                     hovermode: 'x unified',
