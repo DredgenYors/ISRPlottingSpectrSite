@@ -298,6 +298,49 @@
             box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Add glow effect on focus */
             outline: none; /* Remove default outline */
         }
+
+        .toggle-scale-btn {
+    background-color: #FFA500; /* Orange color */
+    color: white; /* White text */
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+.toggle-scale-btn:hover {
+    background-color: #FF8C00; /* Darker orange on hover */
+}
+
+.param-subheading {
+    font-size: 1.1em;
+    font-weight: bold;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    color: #333; /* Dark gray for better readability */
+}
+.param-subsection {
+    margin-bottom: 15px; /* Add spacing between subsections */
+}
+
+.ion-line-btn {
+    background-color: #28a745; /* Green color */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+.ion-line-btn:hover {
+    background-color: #218838; /* Darker green on hover */
+}
         
     </style>
 </head>
@@ -306,6 +349,7 @@
         <div class="button-container">
             <button class="button generate-btn">Generate Plot</button>
             <button class="button reset-btn" onclick="resetValues()">Reset</button>
+            <button class="button ion-line-btn" onclick="zoomToIonLine()">Ion Line</button>
             <span id="error-message" class="error-message">Error: Something went wrong!</span>
             <div id="loading-message" class="loading-message">Generating plot, please wait...</div>
         </div>
@@ -323,51 +367,69 @@
                 <button class="toggle-button" onclick="toggleVisibility(2)">Toggle Plot 3</button>
             </div>
         </div>
+        <div class="button-container">
+            <button class="button toggle-scale-btn" onclick="toggleScale()">Toggle Scale</button>
+        </div>
         <div class="param-section">Variable Parameters</div>
         <div class="param-container" id="variable-params">
-            <div class="input-container">
-                <div>Ion Collision Frequency [Hz]</div>
-                <input type="text" id="nu_i" value="1.0e-7">
+            <div class="param-subsection">
+                <div class="param-subheading">Basic Parameters</div>
+                <div class="input-container">
+                    <div>Radar Frequency [Hz]</div>
+                    <input type="text" id="frequency" value="430e6"> <!-- Default value: 430 MHz -->
+                </div>
+                <div class="input-container">
+                    <div>Scattering Angle [°]</div>
+                    <input type="text" id="theta" value="60">
+                </div>
+                <div class="input-container">
+                    <div>Ion Density [m⁻³]</div>
+                    <input type="text" id="ni" value="2.0e11">
+                </div>
+                <div class="input-container">
+                    <div>Electron Density [m⁻³]</div>
+                    <input type="text" id="ne" value="2.0e11">
+                </div>
+                <div class="input-container">
+                    <div>Electron Temperature [K]</div>
+                    <input type="text" id="Te" value="500">
+                </div>
+                <div class="input-container">
+                    <div>Ion Temperature [K]</div>
+                    <input type="text" id="Ti" value="500">
+                </div>
             </div>
-            <div class="input-container">
-                <div>Electron Collision Frequency [Hz]</div>
-                <input type="text" id="nu_e" value="1.0e-7">
-            </div>
-            <div class="input-container">
-                <div>Ion Density [m⁻³]</div>
-                <input type="text" id="ni" value="2.0e11">
-            </div>
-            <div class="input-container">
-                <div>Electron Density [m⁻³]</div>
-                <input type="text" id="ne" value="2.0e11">
-            </div>
-            <div class="input-container">
-                <div>Scattering Angle [°]</div>
-                <input type="text" id="theta" value="60">
-            </div>
-            <div class="input-container">
-                <div>Electron Temperature [K]</div>
-                <input type="text" id="Te" value="500">
-            </div>
-            <div class="input-container">
-                <div>N Terms [unitless] <i style="font-size: smaller;">odd values will center the plot at 0</i></div>
-                <input type="text" id="n_terms" value="2001">
+            
+            <div class="param-subsection">
+                <div class="param-subheading">Advanced Parameters</div>
+                <div class="input-container">
+                    <div>Ion Collision Frequency [Hz]</div>
+                    <input type="text" id="nu_i" value="1.0e-7">
+                </div>
+                <div class="input-container">
+                    <div>Electron Collision Frequency [Hz]</div>
+                    <input type="text" id="nu_e" value="1.0e-7">
+                </div>
+                <div class="input-container">
+                    <div>Ion Mass [kg]</div>
+                    <input type="text" id="mi" value="2.65686e-26">
+                </div>
+                <div class="input-container">
+                    <div>Electron Mass [kg]</div>
+                    <input type="text" id="me" value="9.11e-31">
+                </div>
+                <div class="input-container">
+                    <div>Magnetic Field [T]</div>
+                    <input type="text" id="B" value="3.6e-5">
+                </div>
+                <div class="input-container">
+                    <div>N Terms [unitless] <i style="font-size: smaller;">odd values will center the plot at 0</i></div>
+                    <input type="text" id="n_terms" value="2001">
+                </div>
             </div>
         </div>
         <div class="param-section"> Constant Parameters  <i style="font-size: smaller;"></i></div>
         <div class="param-container" id="constant-params">
-            <div class="input-container">
-                <div>Ion Mass [kg]</div>
-                <input type="text" id="mi" value="2.65686e-26">
-            </div>
-            <div class="input-container">
-                <div>Electron Mass [kg]</div>
-                <input type="text" id="me" value="9.11e-31">
-            </div>
-            <div class="input-container">
-                <div>Magnetic Field [T]</div>
-                <input type="text" id="B" value="3.6e-5">
-            </div>
             <div class="input-container">
                 <div>Vacuum Permittivity [F/m]</div>
                 <input type="text" id="epsilon_0" value="8.854187817e-12">
@@ -556,6 +618,8 @@
                     ne: "2.0e11",
                     theta: "60",
                     Te: "500",
+                    Ti: "500",
+                    frequency: "430e6",
                     n_terms: "2001",
                     mi: "2.65686e-26",
                     me: "9.11e-31",
@@ -571,6 +635,8 @@
                     ne: "2.5e11",
                     theta: "70",
                     Te: "1000",
+                    Ti: "1000",
+                    frequency: "430e6",
                     n_terms: "3001",
                     mi: "2.75686e-26",
                     me: "1.01e-30",
@@ -586,6 +652,8 @@
                     ne: "3.0e11",
                     theta: "80",
                     Te: "1500",
+                    Ti: "1500",
+                    frequency: "430e6",
                     n_terms: "4001",
                     mi: "3.65686e-26",
                     me: "1.11e-30",
@@ -605,7 +673,50 @@
             }
         }
 
-        
+        let isLogScale = true; // Track the current scale (default is log)
+
+function toggleScale() {
+    const layout = {
+        title: 'Backscatter Spectra',
+        xaxis: { title: 'Frequency (MHz)' },
+        yaxis: {
+            title: 'Spectra',
+            type: isLogScale ? 'linear' : 'log' // Toggle between 'linear' and 'log'
+        },
+        hovermode: 'x unified',
+        autosize: true
+    };
+
+    // Update the plot with the new scale
+    Plotly.react('plot', plotData, layout, { responsive: true });
+
+    // Toggle the scale state
+    isLogScale = !isLogScale;
+
+    console.log(`Y-axis scale toggled to: ${isLogScale ? 'logarithmic' : 'linear'}`);
+}
+
+function zoomToIonLine() {
+    // Ensure plot data exists
+    if (!plotData || plotData.length === 0) {
+        console.error("No plot data available to zoom into the ion line.");
+        alert("Please generate the plot first before zooming into the ion line.");
+        return;
+    }
+
+    // Define the zoom range for the ion line
+    const ionLineXRange = [-0.05, 0.05]; // Centered around 0, adjust width as needed
+    const ionLineYRange = [10e-9, 10e-6]; // Y-axis range for the ion line (logarithmic scale)
+
+    // Update the plot layout to zoom in on the ion line
+    Plotly.relayout('plot', {
+        'xaxis.range': ionLineXRange,
+        'yaxis.type': 'log', // Ensure the y-axis is set to logarithmic
+        'yaxis.range': [Math.log10(ionLineYRange[0]), Math.log10(ionLineYRange[1])] // Convert to log scale
+    });
+
+    console.log("Zoomed in on the ion line with y-axis range:", ionLineYRange);
+}
     </script>
 </body>
 </html>
