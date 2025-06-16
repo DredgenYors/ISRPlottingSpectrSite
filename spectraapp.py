@@ -81,56 +81,79 @@ def update_values():
     global user_values
     data = request.json
     for key in data:
-        user_values[key] = float(data[key])
+        if key == "ion_species":
+            user_values["ion_species"] = data["ion_species"]
+        else:
+            user_values[key] = float(data[key])
     return jsonify({"message": "Values updated"}), 200
 
 def perform_calculations(user_values):
     """ Helper function to perform repeated calculations """
     nu_i = user_values["nu_i"]
     nu_e = user_values["nu_e"]
-    ni = user_values["ni"]
     ne = user_values["ne"]
-    mi = user_values["mi"]
     me = user_values["me"]
     B = user_values["B"]
     theta = user_values["theta"]
     Te = user_values["Te"]
     Ti = user_values["Ti"]
-    frequency = user_values["frequency"]  # Get radar frequency
+    frequency = user_values["frequency"]  
     epsilon_0 = user_values["epsilon_0"]
     kB = user_values["kB"]
     e = user_values["e"]
     n_terms = int(user_values["n_terms"])
+
+    ion_species = user_values.get("ion_species", [
+        {"name": "O+",   "fraction": 0.488, "density": 2.03e5, "mass": 2.65686e-26},
+        {"name": "N+",   "fraction": 0.032, "density": 1.33e4, "mass": 2.32587e-26},
+        {"name": "H+",   "fraction": 0.456, "density": 1.89e5, "mass": 1.67262e-27},
+        {"name": "HE+",  "fraction": 0.024, "density": 9.96e3, "mass": 6.64648e-27},
+        {"name": "O2+",  "fraction": 0.0,   "density": 0.0,    "mass": 5.31372e-26},
+        {"name": "NO+",  "fraction": 0.0,   "density": 0.0,    "mass": 2.4828e-26}
+    ])
 
     # Calculate lambda_wavelength from frequency
     c_light = 3e8  # Speed of light in m/s
     lambda_wavelength = c_light / frequency  # Wavelength in meters
     
     k_total, k_parallel, k_perpendicular = calculate_wavenumber_components(lambda_wavelength, theta)
-    vth_i = calculate_thermal_velocity(kB, Ti, mi)
     vth_e = calculate_thermal_velocity(kB, Te, me)
-    Oc_i = calculate_cyclotron_frequency(1, e, B, mi)
     Oc_e = calculate_cyclotron_frequency(1, e, B, me)
-    rho_i = calculate_average_gyroradius(vth_i, Oc_i)
     rho_e = calculate_average_gyroradius(vth_e, Oc_e)
     lambda_De = calculate_debye_length(Te, ne, epsilon_0, kB, e)
     alpha_e = calculate_alpha(k_total, lambda_De)
-    c = calculate_sound_speed(kB, Te, Ti, mi)
+    c = calculate_sound_speed(kB, Te, Ti, sum(ion["fraction"] * ion["mass"] for ion in ion_species))
     omega_values = calculate_omega_values(k_total, c)
     
-    U_i = calculate_collisional_term(nu_i, k_parallel, vth_i, k_perpendicular, rho_i, n_terms, omega_values, Oc_i)
     U_e = calculate_collisional_term(nu_e, k_parallel, vth_e, k_perpendicular, rho_e, n_terms, omega_values, Oc_e)
-    M_i = calculate_modified_distribution(omega_values, k_parallel, k_perpendicular, vth_i, n_terms, rho_i, Oc_i, nu_i, U_i)
     M_e = calculate_modified_distribution(omega_values, k_parallel, k_perpendicular, vth_e, n_terms, rho_e, Oc_e, nu_e, U_e)
-    chi_i = calculate_electric_susceptibility(omega_values, k_parallel, k_perpendicular, vth_i, n_terms, rho_i, Oc_i, nu_i, alpha_e, U_i, Ti, Ti)
     chi_e = calculate_electric_susceptibility(omega_values, k_parallel, k_perpendicular, vth_e, n_terms, rho_e, Oc_e, nu_e, alpha_e, U_e, Te, Te)
     
-    return omega_values, M_i, M_e, chi_i, chi_e
+    # --- Multi-ion calculation ---
+    M_i_total = 0
+    chi_i_total = 0
+    for ion in ion_species:
+        if ion["fraction"] > 0:
+            mi = ion["mass"]
+            ni = ion["density"]
+            frac = ion["fraction"]
+            vth_i = calculate_thermal_velocity(kB, Ti, mi)
+            Oc_i = calculate_cyclotron_frequency(1, e, B, mi)
+            rho_i = calculate_average_gyroradius(vth_i, Oc_i)
+            lambda_Di = calculate_debye_length(Ti, ni, epsilon_0, kB, e)
+            alpha_i = calculate_alpha(k_total, lambda_Di)
+            U_i = calculate_collisional_term(nu_i, k_parallel, vth_i, k_perpendicular, rho_i, n_terms, omega_values, Oc_i)
+            M_i = calculate_modified_distribution(omega_values, k_parallel, k_perpendicular, vth_i, n_terms, rho_i, Oc_i, nu_i, U_i)
+            chi_i = calculate_electric_susceptibility(omega_values, k_parallel, k_perpendicular, vth_i, n_terms, rho_i, Oc_i, nu_i, alpha_i, U_i, Ti, Ti)
+            M_i_total += frac * M_i
+            chi_i_total += frac * chi_i
+
+    return omega_values, M_i_total, M_e, chi_i_total, chi_e
 
 @app.route('/plot')
 def plot():
-    omega_values, M_i, M_e, chi_i, chi_e = perform_calculations(user_values)
-    spectra = calcSpectra(M_i, M_e, chi_i, chi_e)
+    omega_values, M_i_total, M_e, chi_i_total, chi_e = perform_calculations(user_values)
+    spectra = calcSpectra(M_i_total, M_e, chi_i_total, chi_e)
     
     data = {
         "frequencies": (omega_values / (2 * np.pi * 1e6)).tolist(),
