@@ -341,34 +341,72 @@
 .ion-line-btn:hover {
     background-color: #218838; /* Darker green on hover */
 }
+
+.region-btn {
+    margin-left: 5px;
+    color: white;
+    font-weight: bold;
+}
+
+.tooltip-container {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip-text {
+    visibility: hidden;
+    width: max-content;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px 8px;
+    position: absolute;
+    z-index: 1;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 125%; /* Position above the button */
+    opacity: 0;
+    transition: opacity 0.2s;
+    font-size: 0.95em;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.tooltip-container:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
         
     </style>
 </head>
 <body>
     <div class="left-panel">
         <div class="button-container">
-            <button class="button generate-btn">Generate Plot</button>
-            <button class="button reset-btn" onclick="resetValues()">Reset</button>
-            <button class="button ion-line-btn" onclick="zoomToIonLine()">Ion Line</button>
+            <button class="button generate-btn" title="Generate Selected Plot" >Generate Plot</button>
+            <button class="button reset-btn" onclick="resetValues()" title="Reset all parameter values" >Reset</button>
+            <button class="button ion-line-btn" onclick="zoomToIonLine()" title="Focus on center" >Ion Line</button>
             <span id="error-message" class="error-message">Error: Something went wrong!</span>
             <div id="loading-message" class="loading-message">Generating plot, please wait...</div>
         </div>
         <div class="profile-row">
             <div>
                 <button class="matrix-button blue-button">Plot 1</button>
-                <button class="toggle-button" onclick="toggleVisibility(0)">Toggle Plot 1</button>
+                <button class="toggle-button" onclick="toggleVisibility(0)" title="Toggle Visibility">Toggle Plot 1</button>
             </div>
             <div>
                 <button class="matrix-button">Plot 2</button>
-                <button class="toggle-button" onclick="toggleVisibility(1)">Toggle Plot 2</button>
+                <button class="toggle-button" onclick="toggleVisibility(1)" title="Toggle Visibility">Toggle Plot 2</button>
             </div>
             <div>
                 <button class="matrix-button">Plot 3</button>
-                <button class="toggle-button" onclick="toggleVisibility(2)">Toggle Plot 3</button>
+                <button class="toggle-button" onclick="toggleVisibility(2)" title="Toggle Visibility">Toggle Plot 3</button>
             </div>
         </div>
         <div class="button-container">
-            <button class="button toggle-scale-btn" onclick="toggleScale()">Toggle Scale</button>
+            <button class="button toggle-scale-btn" onclick="toggleScale()" title="Toggle Logarithmic/Linear">Toggle Scale</button>
+            <button class="button region-btn" style="background-color: #800080;" onclick="setERegion()" title="Load Parameters">E-Region</button>
+            <button class="button region-btn" style="background-color: #a020f0;" onclick="setFRegion()" title="Load Parameters">F-Region</button>
         </div>
         <div class="param-section">Variable Parameters</div>
         <div class="param-container" id="variable-params">
@@ -381,10 +419,6 @@
                 <div class="input-container">
                     <div>Scattering Angle [°]</div>
                     <input type="text" id="theta" value="60">
-                </div>
-                <div class="input-container">
-                    <div>Ion Density [m⁻³]</div>
-                    <input type="text" id="ni" value="2.0e11">
                 </div>
                 <div class="input-container">
                     <div>Electron Density [m⁻³]</div>
@@ -426,8 +460,50 @@
                     <div>N Terms [unitless] <i style="font-size: smaller;">odd values will center the plot at 0</i></div>
                     <input type="text" id="n_terms" value="2001">
                 </div>
+                
             </div>
         </div>
+
+        <div class="param-section">Ion Species Fractions & Densities</div>
+<div class="param-container" id="ion-species-params">
+    <div class="input-container">
+        <div>O<sup>+</sup> Fraction (%)</div>
+        <input type="text" id="Oplus_fraction" value="48.8">
+        <div>O<sup>+</sup> Density [m⁻³]</div>
+        <input type="text" id="Oplus_density" value="2.03e5">
+    </div>
+    <div class="input-container">
+        <div>N<sup>+</sup> Fraction (%)</div>
+        <input type="text" id="Nplus_fraction" value="3.2">
+        <div>N<sup>+</sup> Density [m⁻³]</div>
+        <input type="text" id="Nplus_density" value="1.33e4">
+    </div>
+    <div class="input-container">
+        <div>H<sup>+</sup> Fraction (%)</div>
+        <input type="text" id="Hplus_fraction" value="45.6">
+        <div>H<sup>+</sup> Density [m⁻³]</div>
+        <input type="text" id="Hplus_density" value="1.89e5">
+    </div>
+    <div class="input-container">
+        <div>He<sup>+</sup> Fraction (%)</div>
+        <input type="text" id="Heplus_fraction" value="2.4">
+        <div>He<sup>+</sup> Density [m⁻³]</div>
+        <input type="text" id="Heplus_density" value="9.96e3">
+    </div>
+    <div class="input-container">
+        <div>O<sub>2</sub><sup>+</sup> Fraction (%)</div>
+        <input type="text" id="O2plus_fraction" value="0">
+        <div>O<sub>2</sub><sup>+</sup> Density [m⁻³]</div>
+        <input type="text" id="O2plus_density" value="0">
+    </div>
+    <div class="input-container">
+        <div>NO<sup>+</sup> Fraction (%)</div>
+        <input type="text" id="NOplus_fraction" value="0">
+        <div>NO<sup>+</sup> Density [m⁻³]</div>
+        <input type="text" id="NOplus_density" value="0">
+    </div>
+</div>
+
         <div class="param-section"> Constant Parameters  <i style="font-size: smaller;"></i></div>
         <div class="param-container" id="constant-params">
             <div class="input-container">
@@ -494,6 +570,48 @@
         });
 
         function generatePlot() {
+                let newValues = {};
+
+            const ion_species = [
+    {
+        name: "O+",
+        fraction: parseFloat(document.getElementById("Oplus_fraction").value) / 100,
+        density: parseFloat(document.getElementById("Oplus_density").value),
+        mass: 2.65686e-26
+    },
+    {
+        name: "N+",
+        fraction: parseFloat(document.getElementById("Nplus_fraction").value) / 100,
+        density: parseFloat(document.getElementById("Nplus_density").value),
+        mass: 2.32587e-26
+    },
+    {
+        name: "H+",
+        fraction: parseFloat(document.getElementById("Hplus_fraction").value) / 100,
+        density: parseFloat(document.getElementById("Hplus_density").value),
+        mass: 1.67262e-27
+    },
+    {
+        name: "HE+",
+        fraction: parseFloat(document.getElementById("Heplus_fraction").value) / 100,
+        density: parseFloat(document.getElementById("Heplus_density").value),
+        mass: 6.64648e-27
+    },
+    {
+        name: "O2+",
+        fraction: parseFloat(document.getElementById("O2plus_fraction").value) / 100,
+        density: parseFloat(document.getElementById("O2plus_density").value),
+        mass: 5.31372e-26
+    },
+    {
+        name: "NO+",
+        fraction: parseFloat(document.getElementById("NOplus_fraction").value) / 100,
+        density: parseFloat(document.getElementById("NOplus_density").value),
+        mass: 2.4828e-26
+    }
+];
+newValues["ion_species"] = ion_species;
+
     const plotElement = document.getElementById("plot");
     const loadingMessage = document.getElementById("loading-message");
     const errorMessage = document.getElementById("error-message");
@@ -505,7 +623,6 @@
 
     console.log(`Generating plot for profile: ${currentProfile}`);
 
-    let newValues = {};
     document.querySelectorAll("input").forEach(input => {
         newValues[input.id] = parseFloat(input.value);
     });
@@ -610,6 +727,30 @@
         });
 
         function resetValues() {
+            // Default values for Plot1 ion species
+    const defaultIonSpecies = [
+        { fraction: 48.8, density: 2.03e5 }, // O+
+        { fraction: 3.2,  density: 1.33e4 }, // N+
+        { fraction: 45.6, density: 1.89e5 }, // H+
+        { fraction: 2.4,  density: 9.96e3 }, // HE+
+        { fraction: 0,    density: 0 },      // O2+
+        { fraction: 0,    density: 0 }       // NO+
+    ];
+
+    // Reset ion fractions and densities
+    document.getElementById("Oplus_fraction").value = defaultIonSpecies[0].fraction;
+    document.getElementById("Oplus_density").value   = defaultIonSpecies[0].density;
+    document.getElementById("Nplus_fraction").value  = defaultIonSpecies[1].fraction;
+    document.getElementById("Nplus_density").value   = defaultIonSpecies[1].density;
+    document.getElementById("Hplus_fraction").value  = defaultIonSpecies[2].fraction;
+    document.getElementById("Hplus_density").value   = defaultIonSpecies[2].density;
+    document.getElementById("Heplus_fraction").value = defaultIonSpecies[3].fraction;
+    document.getElementById("Heplus_density").value  = defaultIonSpecies[3].density;
+    document.getElementById("O2plus_fraction").value = defaultIonSpecies[4].fraction;
+    document.getElementById("O2plus_density").value  = defaultIonSpecies[4].density;
+    document.getElementById("NOplus_fraction").value = defaultIonSpecies[5].fraction;
+    document.getElementById("NOplus_density").value  = defaultIonSpecies[5].density;
+    
             const profileData = {
                 "Plot1": {
                     nu_i: "1.0e-7",
@@ -716,6 +857,48 @@ function zoomToIonLine() {
     });
 
     console.log("Zoomed in on the ion line with y-axis range:", ionLineYRange);
+}
+
+function setERegion() {
+    // Set temperatures
+    document.getElementById("Ti").value = 1143;
+    document.getElementById("Te").value = 1454;
+
+    // Set ion fractions (in percent)
+    document.getElementById("Oplus_fraction").value = 97.4;
+    document.getElementById("Nplus_fraction").value = 1.8;
+    document.getElementById("Hplus_fraction").value = 0.7;
+    document.getElementById("Heplus_fraction").value = 0.1;
+    document.getElementById("O2plus_fraction").value = 0;
+    document.getElementById("NOplus_fraction").value = 0;
+
+    document.getElementById("Oplus_density").value = 6.88e6;
+    document.getElementById("Nplus_density").value = 1.27e5;
+    document.getElementById("Hplus_density").value = 4.94e4;
+    document.getElementById("Heplus_density").value = 7.06e3;
+    document.getElementById("O2plus_density").value = 0;
+    document.getElementById("NOplus_density").value = 0;
+}
+
+function setFRegion() {
+    // Set temperatures
+    document.getElementById("Ti").value = 3675;
+    document.getElementById("Te").value = 3675;
+
+    // Set ion fractions (in percent)
+    document.getElementById("Oplus_fraction").value = 8.1;
+    document.getElementById("Nplus_fraction").value = 1.6;
+    document.getElementById("Hplus_fraction").value = 85.0;
+    document.getElementById("Heplus_fraction").value = 5.2;
+    document.getElementById("O2plus_fraction").value = 0;
+    document.getElementById("NOplus_fraction").value = 0;
+
+    document.getElementById("Oplus_density").value = 1.02e4;
+    document.getElementById("Nplus_density").value = 2.01e3;
+    document.getElementById("Hplus_density").value = 1.07e5;
+    document.getElementById("Heplus_density").value = 6.52e3;
+    document.getElementById("O2plus_density").value = 0;
+    document.getElementById("NOplus_density").value = 0;
 }
     </script>
 </body>
