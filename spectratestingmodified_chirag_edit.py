@@ -43,14 +43,31 @@ def calculate_omega_values(k, c):
     Returns:
     - an array of doppler shifted frequency points [Hz]
      """
-    omega_min = (-6000000) * 2*np.pi #Calculate the lower bound of angular frequencies
-                                        #Multiply by two pi to convert from hertz to radians
-    omega_max = (6000000) * 2*np.pi #Calculate the upper bound of angular frequencies
-                                        #Multiply by two pi to convert from hertz to radians
-    num_points = 3001 #Specifies the number of frequency values within the range Odd number used so the there is an even number of points to the left
-                     #and right of the center
-    
-    return np.linspace(omega_min, omega_max, num_points) #Return an evenly spaced array of frequencies
+    # Define MHz regions
+    regions = [
+        # (start_MHz, end_MHz, num_points)
+        (-6.0, -4.6, 100),    # far left
+        (-4.5, -4.0, 1000),    # plasma line (left)
+        (-3.9, -0.9, 100),    # between plasma and gyro (left)
+        (-0.8, -0.3, 1000),    # gyro line (left)
+        (-0.2, -0.1, 100),    # between gyro and ion (left)
+        (-0.1, 0.1, 1001),    # ion line (center)
+        (0.1, 0.2, 100),      # between ion and gyro (right)
+        (0.3, 0.8, 1000),      # gyro line (right)
+        (0.9, 3.9, 100),      # between gyro and plasma (right)
+        (4.0, 4.5, 1000),      # plasma line (right)
+        (4.6, 6.0, 100),      # far right
+    ]
+
+    omega_hz = []
+    for start, end, num in regions:
+        # endpoint=False except for the last region to avoid duplicate points
+        endpoint = False if end != regions[-1][1] else True
+        omega_hz.append(np.linspace(start * 1e6, end * 1e6, num, endpoint=endpoint))
+    omega_hz = np.concatenate(omega_hz)
+    omega_rad = omega_hz * 2 * np.pi  # Convert Hz to rad/s
+
+    return omega_rad
 
 def calculate_thermal_velocity(kB, T, m):
     """
@@ -136,17 +153,17 @@ def calculate_modified_distribution(omega, k_par, k_perp, vth, n, rho, Oc, nu, U
         yn = (omega - i * Oc - 1j * nu) / (k_par * vth)
         
         # Real part of the exponential term
-        exp_re = np.exp(-np.real(yn) ** 2)
+        exp_re = np.real(np.exp(-yn**2))
         
         # Imaginary part (Dawson function term)
-        imag_da = 2 * np.imag(dawsn(np.real(yn)))
+        imag_da = 2*np.imag(dawsn(yn))
         
         # Bessel function and exponential term
         bessel_term = ive(i, k_rho_sq)
-        exp_term = np.exp(-k_rho_sq)
+        # exp_term = np.exp(-k_rho_sq) # not included, called already in ive 
         
         # Combine all terms in the summation
-        M += exp_term * bessel_term * (np.sqrt(np.pi) * exp_re + imag_da)
+        M += bessel_term * (np.sqrt(np.pi) * exp_re + imag_da)
     
     # Combine all terms into M_s
     M_s = term_one + term_two * M
@@ -238,12 +255,22 @@ if __name__ == "__main__":
     mi = 2.65686e-26  # Ion mass (atomic oxygen) in kg
     m_e = 9.11e-31  # Electron mass [kg]
     B = 3.6e-5  # Magnetic field strength in Tesla
-    theta = 60  # Scattering angle in degrees
+    theta = 80  # Scattering angle in degrees
     Te_values = [500, 1500, 2500, 3500]  # Electron temperatures in Kelvin
 
     epsilon_0 = 8.854187817e-12  # Vacuum permittivity [F/m]
     kB = 1.380649e-23  # Boltzmann constant [J/K]
     e = 1.602e-19  # Elementary charge [C]
+
+    # Define your ion species here
+    ion_species = [
+        {"name": "O+",   "fraction": 0.488, "density": 2.03e5, "mass": 2.65686e-26},
+        {"name": "N+",   "fraction": 0.032, "density": 1.33e4, "mass": 2.32587e-26},
+        {"name": "H+",   "fraction": 0.456, "density": 1.89e5, "mass": 1.67262e-27},
+        {"name": "HE+",  "fraction": 0.024, "density": 9.96e3, "mass": 6.64648e-27},
+        {"name": "O2+",  "fraction": 0.0,   "density": 0.0,    "mass": 5.31372e-26},
+        {"name": "NO+",  "fraction": 0.0,   "density": 0.0,    "mass": 2.4828e-26}
+    ]
 
     n_terms = 2000
 
@@ -270,6 +297,26 @@ if __name__ == "__main__":
         M_e = calculate_modified_distribution(omega_values, k_parallel, k_perpendicular, vth_e, n_terms, rho_e, Oc_e, nu_e, U_e)
         chi_i = calculate_electric_susceptibility(omega_values, k_parallel, k_perpendicular, vth_i, n_terms, rho_i, Oc_i, nu_i, alpha_i, U_i, Ti, Ti)
         chi_e = calculate_electric_susceptibility(omega_values, k_parallel, k_perpendicular, vth_e, n_terms, rho_e, Oc_e, nu_e, alpha_e, U_e, Te, Te)
+
+        # --- Multi-ion calculation ---
+        M_i_total = 0
+        chi_i_total = 0
+        for ion in ion_species:
+            if ion["fraction"] > 0:
+                mi = ion["mass"]
+                ni = ion["density"]
+                frac = ion["fraction"]
+                vth_i = calculate_thermal_velocity(kB, Ti, mi)
+                Oc_i = calculate_cyclotron_frequency(1, e, B, mi)
+                rho_i = calculate_average_gyroradius(vth_i, Oc_i)
+                lambda_Di = calculate_debye_length(Ti, ni, epsilon_0, kB, e)
+                alpha_i = calculate_alpha(k_total, lambda_Di)
+                U_i = calculate_collisional_term(nu_i, k_parallel, vth_i, k_perpendicular, rho_i, n_terms, omega_values, Oc_i)
+                M_i = calculate_modified_distribution(omega_values, k_parallel, k_perpendicular, vth_i, n_terms, rho_i, Oc_i, nu_i, U_i)
+                chi_i = calculate_electric_susceptibility(omega_values, k_parallel, k_perpendicular, vth_i, n_terms, rho_i, Oc_i, nu_i, alpha_i, U_i, Ti, Ti)
+                M_i_total += frac * M_i
+                chi_i_total += frac * chi_i
+                
         spectra = calcSpectra(M_i, M_e, chi_i, chi_e)
         spectra_list.append(spectra)
     
@@ -283,11 +330,11 @@ if __name__ == "__main__":
     
     ax.set_xlabel('Frequency (MHz)')
     ax.set_ylabel('Spectra')
-    ax.set_title('Full Spectra for Different Electron Temperatures (Te)')
+    ax.set_title('Backscatter Spectra')  # Updated title
     ax.legend()
     ax.grid(True)
     ax.set_yscale('log')
-    ax.set_ylim(1e-14, 1e-4)
+    # ax.set_ylim(1e-14, 1e-4)
     ax.set_xlim(-6, 6)
     plt.tight_layout()
-    plt.show()
+    plt.show(block=True)
