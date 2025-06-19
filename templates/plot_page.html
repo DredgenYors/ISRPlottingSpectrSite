@@ -74,7 +74,6 @@
             padding: 10px 20px;
             font-size: 1.1em; /* Match font size of plot buttons */
             font-weight: bold; /* Match bold text style of plot buttons */
-            text-transform: uppercase; /* Ensure text is uppercase like plot buttons */
             letter-spacing: 1px; /* Add spacing between letters for consistency */
             cursor: pointer;
             color: white;
@@ -326,7 +325,9 @@
     margin-top: 10px;
     margin-bottom: 5px;
     color: #333; /* Dark gray for better readability */
+    text-align: center; /* Center the headings */
 }
+
 .param-subsection {
     margin-bottom: 15px; /* Add spacing between subsections */
 }
@@ -405,8 +406,10 @@
 .ion-grid {
     display: grid;
     grid-template-columns: 1fr 1fr; /* Two equal columns */
-    gap: 10px; /* Space between grid items */
+    gap: 10px; /* Ensure 10px space between grid items */
     align-items: center; /* Align items vertically */
+    width: 100%; /* Ensure the grid takes full width of the container */
+    box-sizing: border-box; /* Include padding and borders in width calculation */
 }
 
 /* Individual Ion Cells */
@@ -414,6 +417,7 @@
     display: flex;
     flex-direction: column; /* Stack label and input vertically */
     gap: 5px; /* Space between label and input */
+    min-width: 0; /* Prevent inputs from overflowing */
 }
 
 /* Labels */
@@ -432,6 +436,15 @@
     border-radius: 5px; /* Rounded corners */
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); /* Subtle inner shadow */
     transition: border-color 0.3s, box-shadow 0.3s; /* Smooth transition for focus */
+    box-sizing: border-box; /* Include padding and borders in width calculation */
+}
+
+/* Responsive Design for Smaller Screens */
+@media (max-width: 768px) {
+    .ion-grid {
+        grid-template-columns: 1fr; /* Stack inputs vertically on smaller screens */
+        gap: 10px; /* Maintain 10px spacing between rows */
+    }
 }
 
 /* Input Focus State */
@@ -456,6 +469,7 @@ button[data-tooltip] {
     position: relative; /* Ensure the button is the positioning context */
 }
 
+/* Tooltip Styling */
 button[data-tooltip]::after {
     content: attr(data-tooltip); /* Use the tooltip text from the data-tooltip attribute */
     visibility: hidden; /* Hide the tooltip by default */
@@ -472,6 +486,8 @@ button[data-tooltip]::after {
     transform: translateX(-50%);
     font-size: 0.85em; /* Smaller font size */
     white-space: nowrap; /* Prevent text wrapping */
+    max-width: calc(100% - 20px); /* Ensure tooltip stays within the left panel */
+    overflow-wrap: break-word; /* Break long words if necessary */
     transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out; /* Smooth fade-in and slide-up effect */
     pointer-events: none; /* Prevent interaction with the tooltip */
 }
@@ -555,6 +571,24 @@ body {
         border-bottom: 1px solid black; /* Add horizontal line */
     }
 }
+
+/* Override text-transform for specific buttons */
+.generate-btn,
+.reset-btn,
+.ion-line-btn,
+.toggle-scale-btn,
+.region-btn.e-region,
+.region-btn.f-region {
+    text-transform: none; /* Prevent auto-capitalization */
+}
+
+/* Explicitly override text-transform for E-Region and F-Region buttons */
+.region-btn.e-region,
+.region-btn.f-region {
+    text-transform: none !important; /* Prevent auto-capitalization */
+}
+
+
         
     </style>
 </head>
@@ -730,6 +764,23 @@ body {
     </div>
     <script>
 
+document.querySelectorAll('button[data-tooltip]').forEach(button => {
+    button.addEventListener('mouseenter', () => {
+        const tooltip = button.querySelector('::after');
+        const tooltipRect = button.getBoundingClientRect();
+        const leftPanelRect = document.querySelector('.left-panel').getBoundingClientRect();
+
+        // Check if the tooltip overflows the right edge of the left panel
+        if (tooltipRect.right > leftPanelRect.right) {
+            button.style.setProperty('--tooltip-left', 'auto');
+            button.style.setProperty('--tooltip-right', '10px'); // Adjust to stay within the container
+        } else {
+            button.style.setProperty('--tooltip-left', '50%');
+            button.style.setProperty('--tooltip-right', 'auto');
+        }
+    });
+});
+
 function formatNumberWithCommas(input) {
     // Parse the input value as a float
     let value = parseFloat(input.value.replace(/,/g, ''));
@@ -776,11 +827,11 @@ function updateIonPercentageTotal() {
     const totalElement = document.getElementById("ion-percentage-total");
     totalElement.textContent = `Total Ion Percentage: ${totalPercentage.toFixed(2)}%`;
 
-    // Change the color if the total is not 100%
-    if (totalPercentage !== 100) {
-        totalElement.style.color = "red";
+    // Change the color only if the total exceeds 100%
+    if (totalPercentage > 100) {
+        totalElement.style.color = "red"; // Turn red if over 100%
     } else {
-        totalElement.style.color = "#333"; // Default dark gray
+        totalElement.style.color = "#333"; // Default dark gray otherwise
     }
 }
         window.onload = function () {
