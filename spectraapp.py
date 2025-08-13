@@ -127,7 +127,7 @@ def perform_calculations(user_values):
     
     U_e = calculate_collisional_term(nu_e, k_parallel, vth_e, k_perpendicular, rho_e, n_terms, omega_values, Oc_e)
     M_e = calculate_modified_distribution(omega_values, k_parallel, k_perpendicular, vth_e, n_terms, rho_e, Oc_e, nu_e, U_e)
-    chi_e = calculate_electric_susceptibility(omega_values, k_parallel, k_perpendicular, vth_e, n_terms, rho_e, Oc_e, nu_e, alpha_e, U_e, Te, Te)
+    chi_e = calculate_electric_susceptibility(omega_values, k_parallel, k_perpendicular, vth_e, n_terms, rho_e, Oc_e, nu_e, alpha_e, U_e, Te, Ti)
     
     # --- Multi-ion calculation ---
     M_i_total = 0
@@ -135,16 +135,13 @@ def perform_calculations(user_values):
     for ion in ion_species:
         if ion["fraction"] > 0:
             mi = ion["mass"]
-            ni = ion["density"]
             frac = ion["fraction"]
             vth_i = calculate_thermal_velocity(kB, Ti, mi)
             Oc_i = calculate_cyclotron_frequency(1, e, B, mi)
             rho_i = calculate_average_gyroradius(vth_i, Oc_i)
-            lambda_Di = calculate_debye_length(Ti, ni, epsilon_0, kB, e)
-            alpha_i = calculate_alpha(k_total, lambda_Di)
             U_i = calculate_collisional_term(nu_i, k_parallel, vth_i, k_perpendicular, rho_i, n_terms, omega_values, Oc_i)
             M_i = calculate_modified_distribution(omega_values, k_parallel, k_perpendicular, vth_i, n_terms, rho_i, Oc_i, nu_i, U_i)
-            chi_i = calculate_electric_susceptibility(omega_values, k_parallel, k_perpendicular, vth_i, n_terms, rho_i, Oc_i, nu_i, alpha_i, U_i, Ti, Ti)
+            chi_i = calculate_electric_susceptibility(omega_values, k_parallel, k_perpendicular, vth_i, n_terms, rho_i, Oc_i, nu_i, alpha_e, U_i, Te, Ti)
             M_i_total += frac * M_i
             chi_i_total += frac * chi_i
 
