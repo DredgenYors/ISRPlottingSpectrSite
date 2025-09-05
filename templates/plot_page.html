@@ -11,8 +11,10 @@
         body {
             font-family: "San Francisco Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             display: flex;
+            flex-direction: row;
             height: 100vh;
             margin: 0;
+            overflow: visible;
         }
         .left-panel {
             width: 25%;
@@ -26,7 +28,7 @@
             border-right: none; /* Remove the solid line */
             position: relative;
             font-family: inherit; /* Inherit font from body */
-            overflow-x: hidden;
+            overflow-x: visible;
         }
         .left-panel * {
             direction: ltr; /* Ensure the content inside the panel remains left-to-right */
@@ -224,6 +226,42 @@
         .loading-message.visible {
     opacity: 1;
 }
+
+@media (max-width: 1375px) {
+            body {
+                flex-direction: column; /* Stack panels vertically */
+            }
+            .left-panel {
+                width: 100%; /* Full width for smaller screens */
+                height: auto; /* Adjust height automatically */
+                border-right: none; /* Remove vertical line */
+                border-bottom: 1px solid black; /* Add horizontal line */
+            }
+            .right-panel {
+                width: 100%; /* Full width for smaller screens */
+                height: auto; /* Adjust height automatically */
+            }
+            .plot-window {
+                width: 100%; /* Full width for smaller screens */
+                height: 300px; /* Adjust height for smaller screens */
+            }
+            .button-container {
+                flex-wrap: wrap; /* Allow buttons to wrap to the next line */
+                justify-content: center; /* Center buttons */
+            }
+            .matrix-button, .toggle-button {
+                width: 45%; /* Adjust button width for smaller screens */
+                margin: 5px auto; /* Add margin for spacing */
+            }
+            .param-container {
+                display: flex;
+                flex-direction: column; /* Stack input containers vertically */
+                gap: 10px; /* Add spacing between input containers */
+            }
+            .input-container {
+                width: 100%; /* Ensure input containers take full width */
+            }
+        }
 
         @media (max-width: 768px) {
             body {
@@ -531,63 +569,20 @@
     margin-bottom: 10px; /* Add spacing below */
 }
 
-/* Tooltip Styling */
-button[data-tooltip] {
-    position: relative; /* Ensure the button is the positioning context */
-}
-
-/* Tooltip Styling */
-button[data-tooltip]::after {
-    content: attr(data-tooltip);
-    visibility: hidden;
-    opacity: 0;
-    background-color: #333;
+.tooltip {
+    position: absolute;
+    z-index: 99999;
+    background: rgba(0, 0, 0, 0.92);
     color: #fff;
-    text-align: center;
-    border-radius: 5px;
-    padding: 6px 12px;
-    position: absolute;
-    z-index: 1;
-    top: 50%;
-    left: 100%;
-    transform: translateY(-50%) translateX(10px);
+    padding: 8px 14px;
+    border-radius: 6px;
     font-size: 0.95em;
-    font-weight: normal;
-    white-space: nowrap;
-    display: block; /* Ensures background fits text */
-    box-sizing: border-box;
-    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
     pointer-events: none;
-    min-width: max-content;
-    right: auto;
-    bottom: auto;
-}
-
-/* If the button is near the left edge, use a modifier class to align tooltip to the left */
-button[data-tooltip].tooltip-align-left::after {
-    left: 0;
-    transform: none;
-}
-
-button[data-tooltip]::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: calc(100% + 2px);
-    transform: translateY(-50%);
-    border-width: 5px; /* Arrow size */
-    border-style: solid;
-    border-color: transparent transparent transparent #333; /* Arrow pointing right */
-    visibility: hidden; /* Hide the arrow by default */
-    opacity: 0; /* Make the arrow invisible */
-    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out; /* Smooth fade-in and slide-up effect */
-}
-
-/* Show Tooltip on Hover */
-button[data-tooltip]:hover::after,
-button[data-tooltip]:hover::before {
-    visibility: visible; /* Show the tooltip and arrow */
-    opacity: 1; /* Make them visible */
+    white-space: nowrap;
+    opacity: 0.97;
+    transition: opacity 0.2s, transform 0.2s;
 }
 
 /* Flexbox Layout for Body */
@@ -609,7 +604,6 @@ body {
     flex-direction: column;
     gap: 10px;
     overflow-y: auto; /* Enable vertical scrolling */
-    border-right: 1px solid black; /* Add a thin vertical black line */
     box-sizing: border-box; /* Include padding and borders in width calculation */
     font-family: inherit; /* Inherit font from body */
 }
@@ -784,10 +778,10 @@ body {
     margin: 0 auto 10px auto;
     font-weight: bold;
 }
-
     </style>
 </head>
 <body>
+    <div id="tooltip" class="tooltip" style="display:none; position:absolute; z-index:99999;"></div>
     <span id="error-message" class="error-message">Error: Something went wrong!</span>
     <div class="left-panel">
         <div class="button-container">
@@ -862,10 +856,54 @@ body {
                     <div>Magnetic Field [T]</div>
                     <input type="text" id="B" value="3.6e-5">
                 </div>
-                <div class="input-container">
-                    <div>N Terms [unitless] <i style="font-size: smaller;">odd values will center the plot at 0, large values will increase the plot generation time, small n values may distort the generated plot</i></div>
-                    <input type="text" id="n_terms" value="2001">
-                </div>
+                <div class="input-container" style="position: relative;">
+    <div style="display: flex; align-items: center;">
+        N Terms [unitless]
+        <button id="nterms-info-btn" type="button" aria-label="Show info" style="
+            margin-left: 8px;
+            background: none;
+            border: none;
+            color: #007BFF;
+            font-size: 1.1em;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+        ">
+            <span style="
+                display: inline-block;
+                width: 1.2em;
+                height: 1.2em;
+                border-radius: 50%;
+                background: #e9f3ff;
+                color: #007BFF;
+                text-align: center;
+                font-weight: bold;
+                font-size: 1em;
+                line-height: 1.2em;
+                border: 1px solid #007BFF;
+            ">i</span>
+        </button>
+    </div>
+    <input type="text" id="n_terms" value="2001">
+    <div id="nterms-info-text" style="
+    display: none;
+    margin-top: 6px;
+    font-size: 0.95em;
+    color: #333;
+    background: #f8f9fa;
+    border: 1px solid #cce5ff;
+    border-radius: 5px;
+    padding: 6px 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+">
+    <ul style="margin: 0; padding-left: 18px;">
+        <li>Odd values will center the plot at '0'</li>
+        <li>Large values will increase the plot generation time</li>
+        <li>Small values may distort the generated plot</li>
+    </ul>
+</div>
+</div>
                 
             </div>
         </div>
@@ -962,7 +1000,7 @@ body {
 
     </div>
     <div class="right-panel">
-        <div id="loading-message" class="loading-message">Generating plot, please wait...</div>
+        <div id="loading-message" class="loading-message">Generating plot...</div>
         <div id="welcome-message" class="welcome-message">
     Welcome! Click "Generate Plot" to begin.
 </div>
@@ -1074,11 +1112,12 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 const loadingPhrases = [
-    "Generating plot, please wait.",
-    "Sending parameters to server",
-    "Calculating spectra",
-    "Rendering plot"
+    "Sending parameters to server",    // 2
+    "Calculating spectra",             // 3
+    "Generating plot, please wait.",   // 1
+    "Rendering plot"                   // 4
 ];
+
 let loadingPhraseIndex = 0;
 let loadingPhraseTimer = null;
 let loadingCycleDuration = 2000; // Default to 2s, will be set dynamically
@@ -1088,8 +1127,7 @@ function startLoadingMessage(message, delayedByCenterMessages = false) {
     loadingPhraseIndex = 0;
     loadingMessage.classList.add("visible");
 
-    // Set timer duration based on whether center messages delayed loading
-    loadingCycleDuration = delayedByCenterMessages ? 2000 : 10000;
+    loadingCycleDuration = delayedByCenterMessages ? 2000 : 20000;
 
     function cyclePhrases() {
         if (loadingPhraseIndex < loadingPhrases.length - 1) {
@@ -1097,19 +1135,20 @@ function startLoadingMessage(message, delayedByCenterMessages = false) {
             loadingPhraseIndex++;
             loadingPhraseTimer = setTimeout(cyclePhrases, loadingCycleDuration / loadingPhrases.length);
         } else {
-            // Stay on the final message
             loadingMessage.textContent = loadingPhrases[loadingPhrases.length - 1];
         }
     }
 
     cyclePhrases();
     loadingDots = 0;
+    clearInterval(loadingInterval); // Prevent multiple intervals
     loadingInterval = setInterval(() => {
+        // Only show dots, not append
+        let baseText = loadingMessage.textContent.split('.')[0]; // Remove any previous dots
+        loadingMessage.textContent = baseText + ".".repeat(loadingDots);
         loadingDots = (loadingDots + 1) % 4;
-        loadingMessage.textContent += ".".repeat(loadingDots);
     }, 500);
 }
-
 
 function stopLoadingMessage() {
     const loadingMessage = document.getElementById("loading-message");
@@ -1257,6 +1296,14 @@ function updateIonPercentageTotal() {
 }
 
         function generatePlot() {
+    // Tooltip logic: always set "Generating Plot..." when plot starts
+    const genBtn = document.querySelector('.generate-btn');
+    if (genBtn) {
+        if (!genBtn.dataset.origTooltip) genBtn.dataset.origTooltip = genBtn.getAttribute('data-tooltip') || 'Generate Selected Plot';
+        window.isGeneratingPlot = true;
+        genBtn.setAttribute('data-tooltip', 'Generating Plot...');
+    }
+
     hideWelcomeMessage();
     const errorMessage = document.getElementById("error-message");
     const plotElement = document.getElementById("plot");
@@ -1267,6 +1314,10 @@ function updateIonPercentageTotal() {
 
     // Check if the total percentage exceeds 100%
     if (totalPercentage > 100) {
+        if (genBtn) {
+            window.isGeneratingPlot = false;
+            genBtn.setAttribute('data-tooltip', genBtn.dataset.origTooltip);
+        }
         stopLoadingMessage();
         hideCenterLoadingMessage();
         errorMessage.textContent = "Ion percentage exceeds 100%, please edit the values and try again.";
@@ -1326,10 +1377,10 @@ function updateIonPercentageTotal() {
     // Delay showing center messages until welcome message is faded out
     setTimeout(() => {
         if (!firstPlotGenerated && paramsAreDefault(getCurrentParams(), defaultParamsSnapshot)) {
-    showCenterLoadingMessage();
-} else {
-    startLoadingMessage("Calculating spectra");
-}
+            showCenterLoadingMessage();
+        } else {
+            startLoadingMessage("Calculating spectra");
+        }
     }, 1000);
 
     updateLoadingMessage("Sending parameters to server");
@@ -1373,11 +1424,21 @@ function updateIonPercentageTotal() {
 
         Plotly.newPlot('plot', plotData, layout, { responsive: true });
         plotElement.classList.add('visible');
+
+        // Restore tooltip and state
+        if (genBtn) {
+            window.isGeneratingPlot = false;
+            genBtn.setAttribute('data-tooltip', genBtn.dataset.origTooltip);
+        }
         stopLoadingMessage();
         hideCenterLoadingMessage();
         firstPlotGenerated = true;
     })
     .catch(error => {
+        if (genBtn) {
+            window.isGeneratingPlot = false;
+            genBtn.setAttribute('data-tooltip', genBtn.dataset.origTooltip);
+        }
         stopLoadingMessage();
         document.getElementById("loading-message").style.opacity = "0";
         hideCenterLoadingMessage();
@@ -1610,9 +1671,8 @@ function setFRegion() {
 
 document.querySelectorAll('button[data-tooltip]').forEach(button => {
     button.addEventListener('mouseenter', function() {
-        // Remove the modifier class first
         button.classList.remove('tooltip-align-left');
-        // Create a temporary tooltip to measure
+        // Measure tooltip width
         const tooltipText = button.getAttribute('data-tooltip');
         const tempTooltip = document.createElement('div');
         tempTooltip.style.position = 'absolute';
@@ -1626,9 +1686,13 @@ document.querySelectorAll('button[data-tooltip]').forEach(button => {
         const tooltipWidth = tempTooltip.offsetWidth;
         document.body.removeChild(tempTooltip);
 
+        // Get button and left panel positions
         const buttonRect = button.getBoundingClientRect();
-        const tooltipLeft = buttonRect.left + buttonRect.width / 2 - tooltipWidth / 2;
-        if (tooltipLeft < 0) {
+        const leftPanelRect = document.querySelector('.left-panel').getBoundingClientRect();
+
+        // If tooltip would overflow right edge of left panel, align left
+        const tooltipRight = buttonRect.right + 10 + tooltipWidth;
+        if (tooltipRight > leftPanelRect.right) {
             button.classList.add('tooltip-align-left');
         }
     });
@@ -1648,7 +1712,71 @@ window.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+document.getElementById('nterms-info-btn').addEventListener('click', function() {
+        const info = document.getElementById('nterms-info-text');
+        info.style.display = (info.style.display === 'none' || info.style.display === '') ? 'block' : 'none';
+    });
 
+    (function() {
+    const genBtn = document.querySelector('.generate-btn');
+    if (!genBtn) return;
+
+    // Store the original tooltip text
+    genBtn.dataset.origTooltip = genBtn.getAttribute('data-tooltip') || 'Generate Selected Plot';
+
+    // Track whether a plot is being generated
+    window.isGeneratingPlot = false;
+
+    // Wrap startLoadingMessage to set the tooltip and flag
+    if (typeof window.startLoadingMessage === 'function') {
+        const _start = window.startLoadingMessage;
+        window.startLoadingMessage = function(message, delayedByCenterMessages = false) {
+            window.isGeneratingPlot = true;
+            genBtn.setAttribute('data-tooltip', 'Generating Plot...');
+            return _start.apply(this, arguments);
+        };
+    }
+
+    // Wrap stopLoadingMessage to restore the tooltip and flag
+    if (typeof window.stopLoadingMessage === 'function') {
+        const _stop = window.stopLoadingMessage;
+        window.stopLoadingMessage = function() {
+            window.isGeneratingPlot = false;
+            genBtn.setAttribute('data-tooltip', genBtn.dataset.origTooltip);
+            return _stop.apply(this, arguments);
+        };
+    }
+
+    // On hover, always show the correct tooltip
+    genBtn.addEventListener('mouseenter', function() {
+        if (window.isGeneratingPlot) {
+            this.setAttribute('data-tooltip', 'Generating Plot...');
+        } else {
+            this.setAttribute('data-tooltip', this.dataset.origTooltip);
+        }
+    });
+    genBtn.addEventListener('mouseleave', function() {
+        this.setAttribute('data-tooltip', window.isGeneratingPlot ? 'Generating Plot...' : this.dataset.origTooltip);
+    });
+})();
+
+document.querySelectorAll('button[data-tooltip]').forEach(button => {
+    button.addEventListener('mouseenter', function(e) {
+        const tooltip = document.getElementById('tooltip');
+        tooltip.textContent = button.getAttribute('data-tooltip');
+        tooltip.style.display = 'block';
+
+        // Position tooltip to the right and vertically centered with the button
+        const rect = button.getBoundingClientRect();
+        tooltip.style.left = (rect.right + window.scrollX + 3) + 'px';
+        tooltip.style.top = (rect.top + window.scrollY + rect.height/2 - tooltip.offsetHeight/2) + 'px';
+    });
+
+    button.addEventListener('mouseleave', function() {
+        const tooltip = document.getElementById('tooltip');
+        tooltip.style.display = 'none';
+    });
+});
     </script>
 </body>
 </html>
