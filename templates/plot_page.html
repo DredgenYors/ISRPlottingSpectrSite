@@ -1093,13 +1093,17 @@ function maybeShowLoadingMessage() {
 }
 
 function showCenterLoadingMessage() {
+    const welcomeMsg = document.getElementById("welcome-message");
+    // Only show center messages if welcome message is NOT visible
+    if (welcomeMsg && welcomeMsg.classList.contains("visible")) {
+        // Do nothing if welcome message is visible
+        return;
+    }
     document.getElementById("center-loading-message").classList.add("visible");
-    // Fade in the second message after 1.2 seconds
     setTimeout(() => {
         document.getElementById("center-loading-message-2").classList.add("visible");
     }, 1200);
 
-    // Fade out both messages after 30 seconds if plot not generated
     if (window.centerMsgTimeout) clearTimeout(window.centerMsgTimeout);
     window.centerMsgTimeout = setTimeout(() => {
         hideCenterLoadingMessage();
@@ -1192,10 +1196,13 @@ document.querySelectorAll('button[data-tooltip]').forEach(button => {
 });
 
 function formatNumberWithCommas(input) {
-    // Parse the input value as a float
-    let value = parseFloat(input.value.replace(/,/g, ''));
-    if (!isNaN(value)) {
-        // Format the number with commas
+    let raw = input.value.replace(/,/g, '');
+    let value = Number(raw);
+
+    // If the input contains 'e' (exponential notation) or is very small, do not format
+    if (raw.includes('e') || Math.abs(value) < 0.01) {
+        input.value = raw;
+    } else if (!isNaN(value)) {
         input.value = value.toLocaleString('en-US');
     }
 }
@@ -1206,8 +1213,10 @@ function removeNumberFormatting(input) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Select all input fields that may contain large numbers
-    const numericInputs = document.querySelectorAll('#variable-params input[type="text"], #ion-species-params input[type="text"]');
+    // Select all input fields in both variable params and ion grid
+    const numericInputs = document.querySelectorAll(
+        '#variable-params input[type="text"], .ion-grid input[type="text"]'
+    );
 
     numericInputs.forEach(input => {
         input.addEventListener('blur', function () {
@@ -1327,43 +1336,54 @@ function updateIonPercentageTotal() {
 
     let newValues = {};
 
-    // Build ion species array
+        // Build ion species array
     updateLoadingMessage("Collecting ion species parameters");
+    function safeNumber(val) {
+        // Remove commas and trim whitespace
+        val = (val || "").replace(/,/g, "").trim();
+        // If empty, return null
+        if (val === "") return null;
+        // Use Number() to parse exponential notation correctly
+        let num = Number(val);
+        return isNaN(num) ? null : num;
+    }
+
+    // Build ion species array
     const ion_species = [
         {
             name: "O+",
-            fraction: parseFloat(document.getElementById("Oplus_fraction").value) / 100,
-            density: parseFloat(document.getElementById("Oplus_density").value),
+            fraction: safeNumber(document.getElementById("Oplus_fraction").value) / 100,
+            density: safeNumber(document.getElementById("Oplus_density").value),
             mass: 2.65686e-26
         },
         {
             name: "N+",
-            fraction: parseFloat(document.getElementById("Nplus_fraction").value) / 100,
-            density: parseFloat(document.getElementById("Nplus_density").value),
+            fraction: safeNumber(document.getElementById("Nplus_fraction").value) / 100,
+            density: safeNumber(document.getElementById("Nplus_density").value),
             mass: 2.32587e-26
         },
         {
             name: "H+",
-            fraction: parseFloat(document.getElementById("Hplus_fraction").value) / 100,
-            density: parseFloat(document.getElementById("Hplus_density").value),
+            fraction: safeNumber(document.getElementById("Hplus_fraction").value) / 100,
+            density: safeNumber(document.getElementById("Hplus_density").value),
             mass: 1.67262e-27
         },
         {
             name: "HE+",
-            fraction: parseFloat(document.getElementById("Heplus_fraction").value) / 100,
-            density: parseFloat(document.getElementById("Heplus_density").value),
+            fraction: safeNumber(document.getElementById("Heplus_fraction").value) / 100,
+            density: safeNumber(document.getElementById("Heplus_density").value),
             mass: 6.64648e-27
         },
         {
             name: "O2+",
-            fraction: parseFloat(document.getElementById("O2plus_fraction").value) / 100,
-            density: parseFloat(document.getElementById("O2plus_density").value),
+            fraction: safeNumber(document.getElementById("O2plus_fraction").value) / 100,
+            density: safeNumber(document.getElementById("O2plus_density").value),
             mass: 5.31372e-26
         },
         {
             name: "NO+",
-            fraction: parseFloat(document.getElementById("NOplus_fraction").value) / 100,
-            density: parseFloat(document.getElementById("NOplus_density").value),
+            fraction: safeNumber(document.getElementById("NOplus_fraction").value) / 100,
+            density: safeNumber(document.getElementById("NOplus_density").value),
             mass: 2.4828e-26
         }
     ];
@@ -1371,7 +1391,14 @@ function updateIonPercentageTotal() {
 
     // Collect all other input values
     document.querySelectorAll("input").forEach(input => {
-        newValues[input.id] = parseFloat(input.value);
+        let num = safeNumber(input.value);
+        if (num !== null) {
+            newValues[input.id] = num;
+        }
+        // Optionally, highlight invalid fields:
+        else {
+            input.style.borderColor = "red";
+        }
     });
 
     // Delay showing center messages until welcome message is faded out
