@@ -4,10 +4,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # --- Import classic ISR spectrum code (Marco Milla) ---
-sys.path.append(os.path.join(os.path.dirname(__file__), 'EEApproach'))
+sys.path.append(os.path.join(os.path.dirname(__file__), 'EEVersion'))
 import plasma_parameters as plasma_param
 import physical_constants as phys_cons
 from isr_spectrum import isrSpectrum
+
+# Import or calculate omega_values
+from spectratestingmodified_chirag_edit import calculate_omega_values, calculate_wavenumber_components, calculate_sound_speed
 
 # --- Import ISRPlottingSpectrSite-main code (Chirag's) ---
 from spectratestingmodified_chirag_edit import (
@@ -23,6 +26,23 @@ from spectratestingmodified_chirag_edit import (
     calculate_electric_susceptibility,
     calcSpectra
 )
+
+# Define parameters (use the same as in spectratestingmodified_chirag_edit.py)
+lambda_wavelength = 0.69719
+theta_degrees = 60
+kB = 1.380649e-23
+Te = 500
+Ti = 500
+mi = 2.65686e-26
+
+# Calculate omega_values
+k, _, _ = calculate_wavenumber_components(lambda_wavelength, theta_degrees)
+c = calculate_sound_speed(kB, Te, Ti, mi)
+omega_values = calculate_omega_values(k, c)
+
+# Convert omega_values to frequency in kHz
+frequency_kHz = omega_values / (2 * np.pi * 1e3)
+
 
 def run_marco_spectrum():
     Ne = 2E11
@@ -126,51 +146,38 @@ def plot_comparison():
     f_marco, spc_marco = run_marco_spectrum()
     f_chirag, spc_chirag = run_chirag_spectrum()
 
-    # ensure ascending frequency arrays and protect from zeros before plotting
+    spc_marco = spc_marco / np.max(spc_marco)
+    spc_chirag = spc_chirag / np.max(spc_chirag)
+
+    # Ensure ascending frequency arrays and protect from zeros before plotting
     idx_m = np.argsort(f_marco); f_marco = f_marco[idx_m]; spc_marco = spc_marco[idx_m]
     idx_c = np.argsort(f_chirag); f_chirag = f_chirag[idx_c]; spc_chirag = spc_chirag[idx_c]
-    floor = 1e-300
-    spc_marco = np.maximum(spc_marco, floor)
-    spc_chirag = np.maximum(spc_chirag, floor)
 
     # Overlayed spectra: plot the original (un-interpolated) outputs
     plt.figure(figsize=(12, 6))
-    plt.plot(f_marco, 10 * np.log10(spc_marco), label="Marco's isrSpectrum ", alpha=0.8)
-    plt.plot(f_chirag, 10 * np.log10(spc_chirag), label="Chirag's ISR Site ", alpha=0.8)
+    plt.plot(f_marco, spc_marco, label="Marco's isrSpectrum (raw)", alpha=0.8)
+    plt.plot(f_chirag, spc_chirag, label="Chirag's ISR Site (raw)", alpha=0.8)
     plt.grid()
-    plt.xlim([-6e3, 6e3])
     plt.xlabel('Frequency [kHz]')
-    plt.ylabel('Spectra [dB]')
+    plt.ylabel('Spectra [Linear Scale]')
+    plt.xlim([frequency_kHz.min(), frequency_kHz.max()])
     plt.title('ISR Spectrum Comparison: EE Approach vs. ISR Site ')
     plt.legend()
     plt.tight_layout()
     plt.show()
+    print("Spectra values:", spc_marco)
 
     # Align spectra on a common frequency grid for difference/ratio/metrics
     f_common, spc_marco_interp, spc_chirag_interp = align_spectra(f_marco, spc_marco, f_chirag, spc_chirag)
 
     # Difference plot (on aligned grid)
-    diff = 10 * np.log10(spc_marco_interp) - 10 * np.log10(spc_chirag_interp)
+    diff = spc_marco_interp - spc_chirag_interp
     plt.figure(figsize=(12, 4))
-    plt.plot(f_common, diff, label='Difference (Marco - Chirag) [dB]')
+    plt.plot(f_common, diff, label='Difference (Marco - Chirag) [Linear]')
     plt.grid()
-    plt.xlim([-6e3, 6e3])
     plt.xlabel('Frequency [kHz]')
-    plt.ylabel('Difference [dB]')
+    plt.ylabel('Difference [Linear Scale]')
     plt.title('Spectra Difference (aligned grid)')
-    plt.legend()
-    plt.tight_layout()
-    plt.show()
-
-    # Overlayed spectra: plot the original (raw linear units)
-    plt.figure(figsize=(12, 6))
-    plt.plot(f_marco, spc_marco, label="Marco's isrSpectrum (raw)", alpha=0.8)
-    plt.plot(f_chirag, spc_chirag, label="Chirag's ISR Site (raw)", alpha=0.8)
-    plt.grid()
-    plt.xlim([-6e3, 6e3])
-    plt.xlabel('Frequency [kHz]')
-    plt.ylabel('Spectrum (linear units)')
-    plt.title('ISR Spectrum Comparison: EE Approach vs. ISR Site (raw outputs)')
     plt.legend()
     plt.tight_layout()
     plt.show()

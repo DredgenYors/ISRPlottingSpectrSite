@@ -228,14 +228,14 @@ def calcSpectra(M_i, M_e, chi_i, chi_e):
 # Ensure the script only runs when executed directly, not when imported
 if __name__ == "__main__":
     # Sample Data
-    nu_i = .0000001  # Ion collision frequency in Hz
-    nu_e = 0.0000001  # Electron collision frequency in Hz
+    nu_i = 1e-7 # Ion collision frequency in Hz
+    nu_e = 1e-7  # Electron collision frequency in Hz
     ni =  2e11  # Ion and electron densities in m^-3
     ne_ = 2e11
     mi = 2.65686e-26  # Ion mass (atomic oxygen) in kg
     m_e = 9.11e-31  # Electron mass [kg]
     B = 3.6e-5  # Magnetic field strength in Tesla
-    theta = 80  # Scattering angle in degrees
+    theta = 60  # Scattering angle in degrees
     Te_values = [500, 1500, 2500, 3500]  # Electron temperatures in Kelvin
 
     epsilon_0 = 8.854187817e-12  # Vacuum permittivity [F/m]
@@ -245,9 +245,9 @@ if __name__ == "__main__":
     # Define your ion species here
     ion_species = [
         {"name": "O+",   "fraction": 0.488, "density": 2.03e5, "mass": 2.65686e-26},
-        {"name": "N+",   "fraction": 0.032, "density": 1.33e4, "mass": 2.32587e-26},
-        {"name": "H+",   "fraction": 0.456, "density": 1.89e5, "mass": 1.67262e-27},
-        {"name": "HE+",  "fraction": 0.024, "density": 9.96e3, "mass": 6.64648e-27},
+        {"name": "N+",   "fraction": 0.0, "density": 1.33e4, "mass": 2.32587e-26},
+        {"name": "H+",   "fraction": 0.0, "density": 1.89e5, "mass": 1.67262e-27},
+        {"name": "HE+",  "fraction": 0.0, "density": 9.96e3, "mass": 6.64648e-27},
         {"name": "O2+",  "fraction": 0.0,   "density": 0.0,    "mass": 5.31372e-26},
         {"name": "NO+",  "fraction": 0.0,   "density": 0.0,    "mass": 2.4828e-26}
     ]
@@ -297,7 +297,7 @@ if __name__ == "__main__":
                 M_i_total += frac * M_i
                 chi_i_total += frac * chi_i
                 
-        spectra = calcSpectra(M_i, M_e, chi_i, chi_e)
+        spectra = calcSpectra(M_i_total, M_e, chi_i_total, chi_e)
         spectra_list.append(spectra)
     
     # Plotting
