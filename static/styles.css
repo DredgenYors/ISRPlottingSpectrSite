@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 body {
     font-family: Arial, sans-serif;
     text-align: center;
@@ -72,3 +73,174 @@ body {
     text-decoration: underline;
 }
 
+=======
+/**
+ * Global body styles establishing the foundation for the entire page.
+ * Sets up typography, layout, and background appearance.
+ */
+body {
+    font-family: Arial, sans-serif;    /* Clean, readable sans-serif font */
+    text-align: center;                /* Center-align content by default */
+    background-color: #f4f4f4;         /* Light gray background for subtle contrast */
+    margin: 0;                         /* Remove default browser margins */
+    padding: 0;                        /* Remove default browser padding */
+}
+
+/* ================================================================================
+   HEADER SECTION - TITLE AND BACKGROUND IMAGE
+================================================================================ */
+
+/**
+ * Header container that holds the background image and title overlay.
+ * Uses relative positioning to allow absolute positioning of child elements.
+ */
+#header-section {
+    position: relative;                /* Enable positioned children */
+    text-align: center;               /* Center-align header content */
+    height: 200px;                    /* Fixed height for consistent layout */
+}
+
+/**
+ * Background image styling with responsive scaling and positioning.
+ * Uses object-fit for modern browsers to maintain aspect ratio.
+ */
+#header-image {
+    width: 100%;                      /* Full width of container */
+    height: 200px;                    /* Match container height */
+    object-fit: cover;                /* Scale image to cover area while preserving aspect ratio */
+    object-position: center top;      /* Position image to show top-center portion */
+}
+
+/**
+ * Title overlay positioned absolutely over the header image.
+ * Uses transform for perfect centering regardless of text length.
+ */
+#header-title {
+    position: absolute;               /* Position relative to header-section */
+    top: 50%;                        /* Vertical center point */
+    left: 50%;                       /* Horizontal center point */
+    transform: translate(-50%, -50%); /* Offset by half width/height for true centering */
+    color: white;                    /* White text for contrast against image */
+    font-size: 2rem;                 /* Large, prominent text size */
+    font-weight: bold;               /* Bold weight for better readability */
+    text-shadow: 2px 2px 5px black;  /* Dark shadow for text legibility over image */
+    margin: 0;                       /* Remove default heading margins */
+}
+
+/* ================================================================================
+   NAVIGATION BUTTONS - MAIN MENU BAR
+================================================================================ */
+
+/**
+ * Navigation button container using flexbox for even distribution.
+ * Centers buttons horizontally with consistent spacing.
+ */
+#nav-buttons {
+    display: flex;                    /* Use flexbox layout */
+    justify-content: center;          /* Center buttons horizontally */
+    gap: 15px;                       /* Consistent spacing between buttons */
+    margin: 20px 0;                  /* Vertical margin for separation from other elements */
+}
+
+/**
+ * Individual navigation button styling with hover effects.
+ * Semi-transparent background allows for versatile use over various backgrounds.
+ */
+.nav-btn {
+    padding: 10px 15px;              /* Comfortable click target size */
+    font-size: 1rem;                 /* Standard readable font size */
+    font-weight: bold;               /* Bold text for better visibility */
+    color: white;                    /* White text for contrast */
+    background-color: rgba(0, 0, 0, 0.7);  /* Semi-transparent dark background */
+    border: none;                    /* Remove default button border */
+    border-radius: 5px;              /* Rounded corners for modern appearance */
+    cursor: pointer;                 /* Pointer cursor indicates clickability */
+    transition: background-color 0.3s ease;  /* Smooth color transition on hover */
+}
+
+/**
+ * Navigation button hover state for interactive feedback.
+ * Darkens background to indicate interactivity.
+ */
+.nav-btn:hover {
+    background-color: rgba(0, 0, 0, 0.9);  /* Darker background on hover */
+}
+
+/* ================================================================================
+   DROPDOWN MENU SYSTEM
+================================================================================ */
+
+/**
+ * Dropdown container for category-specific menu items.
+ * Initially hidden, becomes visible when populated by JavaScript.
+ */
+#dropdown-container {
+    display: none;                   /* Hidden by default */
+    background-color: rgba(0, 0, 0, 0.9);  /* Semi-transparent dark background */
+    padding: 10px;                   /* Internal spacing for content */
+    border-radius: 5px;              /* Rounded corners matching button style */
+    max-width: 300px;                /* Prevent dropdown from becoming too wide */
+    margin: auto;                    /* Center the dropdown horizontally */
+}
+
+/**
+ * Individual dropdown menu items with hover effects.
+ * Block display ensures full-width clickable areas.
+ */
+.dropdown-item {
+    display: block;
+    color: white;
+    text-decoration: none;
+    padding: 10px 18px;
+    margin-bottom: 16px;           /* More space between buttons */
+    font-size: 1rem;
+    background: rgba(0, 0, 0, 0.85); /* Solid black button look */
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    transition: background 0.2s;
+}
+
+.dropdown-item:hover {
+    background: rgba(0, 0, 0, 1);   /* Even darker on hover */
+    text-decoration: underline;
+}
+
+.dropdown-item:last-child {
+    margin-bottom: 0;               /* No extra space after last button */
+}
+
+/**
+ * Dropdown item hover state for visual feedback.
+ * Adds underline to indicate interactivity.
+ */
+.dropdown-item:hover {
+    text-decoration: underline;       /* Underline on hover for feedback */
+}
+
+/* ================================================================================
+   CONTENT SECTIONS - IFRAME AND EXTRA CONTENT
+================================================================================ */
+
+/**
+ * Extra ISR content section for additional information display.
+ * Centers content and provides adequate spacing.
+ */
+#extra-isr {
+    margin-top: 20px;                /* Separation from navigation elements */
+    text-align: center;              /* Center-align content within section */
+}
+
+/**
+ * Iframe for embedded external content.
+ * Responsive sizing with subtle border for definition.
+ */
+#extra-iframe {
+    width: 90%;                      /* Responsive width with margins */
+    height: 500px;                   /* Fixed height for consistent layout */
+    border: 1px solid #ccc;          /* Subtle border for definition */
+    margin-top: 20px;                /* Separation from other elements */
+}
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85

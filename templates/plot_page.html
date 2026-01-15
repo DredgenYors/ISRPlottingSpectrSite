@@ -11,8 +11,15 @@
         body {
             font-family: "San Francisco Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             display: flex;
+<<<<<<< HEAD
             height: 100vh;
             margin: 0;
+=======
+            flex-direction: row;
+            height: 100vh;
+            margin: 0;
+            overflow: visible;
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
         }
         .left-panel {
             width: 25%;
@@ -23,8 +30,15 @@
             gap: 10px;
             overflow-y: auto; /* Enable vertical scrolling */
             direction: rtl; /* Reverse the direction to move the scrollbar to the left */
+<<<<<<< HEAD
             border-right: 1px solid black; /* Add a thin vertical black line */
             font-family: inherit; /* Inherit font from body */
+=======
+            border-right: none; /* Remove the solid line */
+            position: relative;
+            font-family: inherit; /* Inherit font from body */
+            overflow-x: visible;
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
         }
         .left-panel * {
             direction: ltr; /* Ensure the content inside the panel remains left-to-right */
@@ -33,6 +47,7 @@
             width: 10px; /* Width of the scrollbar */
         }
         .left-panel::-webkit-scrollbar-track {
+<<<<<<< HEAD
             background: #f4f4f4; /* Background of the scrollbar track */
             border-radius: 5px; /* Rounded corners for the track */
         }
@@ -44,13 +59,69 @@
         .left-panel::-webkit-scrollbar-thumb:hover {
             background: rgba(0, 0, 0, 0.7); /* Slightly less transparent on hover */
         }
+=======
+    background: linear-gradient(
+        to left,
+        rgba(0,0,0,0.08) 0%,
+        #f4f4f4 40%,
+        #f4f4f4 100%
+    );
+    border-radius: 5px;
+}
+        .left-panel::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 5px;
+    border: 2px solid #f4f4f4;
+}
+        .left-panel::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.7); /* Slightly less transparent on hover */
+        }
+        .left-panel::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 12px;
+    height: 100%;
+    pointer-events: none;
+    background: linear-gradient(
+        to left,
+        rgba(0,0,0,0.05) 0%,
+        rgba(0,0,0,0.01) 40%,
+        rgba(0,0,0,0.001) 100%
+    );
+    z-index: 2;
+        }
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
         .right-panel {
             width: 75%;
             display: flex;
             justify-content: center;
             align-items: center;
             font-family: inherit; /* Inherit font from body */
+<<<<<<< HEAD
         }
+=======
+            position: relative;
+        }
+        /* Right panel shadow on the left edge */
+.right-panel::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 12px;
+    height: 100%;
+    pointer-events: none;
+    background: linear-gradient(
+        to right,
+        rgba(0,0,0,0.05) 0%,
+        rgba(0,0,0,0.01) 40%,
+        rgba(0,0,0,0.001) 100%
+    );
+    z-index: 2;
+}
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
         .plot-window {
             width: 90%; /* Increase width to take up more space */
             height: 90%; /* Increase height to take up more space */
@@ -74,7 +145,10 @@
             padding: 10px 20px;
             font-size: 1.1em; /* Match font size of plot buttons */
             font-weight: bold; /* Match bold text style of plot buttons */
+<<<<<<< HEAD
             text-transform: uppercase; /* Ensure text is uppercase like plot buttons */
+=======
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
             letter-spacing: 1px; /* Add spacing between letters for consistency */
             cursor: pointer;
             color: white;
@@ -104,12 +178,35 @@
             margin-bottom: 5px;
         }
         .error-message {
+<<<<<<< HEAD
             display: none;
             margin-left: 10px; /* Position to the right of the reset button */
             color: red;
             font-size: 0.9em;
             font-weight: bold;
         }
+=======
+    display: none;
+    position: fixed;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    background: #fff0f0;
+    color: #d8000c;
+    font-size: 1.1em;
+    font-weight: bold;
+    padding: 12px 30px;
+    border: 2px solid #d8000c;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    max-width: 90vw;
+    width: max-content;
+    min-width: 200px;
+    text-align: center;
+    pointer-events: none; /* Prevents accidental clicks */
+    }
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
         .matrix-button {
             width: 100px;
             height: 50px;
@@ -135,24 +232,44 @@
         }
         .toggle-button {
             padding: 5px 15px; /* Decrease size of toggle buttons */
+<<<<<<< HEAD
             font-size: 0.9em; /* Adjust font size */
             cursor: pointer;
             color: black;
             border: none;
             border-radius: 5px;
             background-color: #FFC107; /* Green color for toggle buttons */
+=======
+            font-size: 1.1em; /* Adjust font size */
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            background-color: #B8860B; /* Green color for toggle buttons */
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
             transition: background-color 0.3s;
             margin-left: 5px; /* Add space between toggle buttons */
             font-family: inherit; /* Inherit font from body */
         }
         .toggle-button:hover {
+<<<<<<< HEAD
             background-color: #E0A800; /* Darker green on hover */
+=======
+            background-color: #8B7500; /* Darker green on hover */
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
         }
         .param-container, .input-container div, input {
             font-family: inherit; /* Ensure parameter sections use the new font */
         }
         .loading-message {
+<<<<<<< HEAD
             display: none;
+=======
+            opacity: 0;
+    transition: opacity 1s ease;
+            display: block;
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
             position: absolute;
             top: 10px;
             right: 10px;
@@ -164,6 +281,49 @@
             z-index: 1000;
         }
 
+<<<<<<< HEAD
+=======
+        .loading-message.visible {
+    opacity: 1;
+}
+
+@media (max-width: 1375px) {
+            body {
+                flex-direction: column; /* Stack panels vertically */
+            }
+            .left-panel {
+                width: 100%; /* Full width for smaller screens */
+                height: auto; /* Adjust height automatically */
+                border-right: none; /* Remove vertical line */
+                border-bottom: 1px solid black; /* Add horizontal line */
+            }
+            .right-panel {
+                width: 100%; /* Full width for smaller screens */
+                height: auto; /* Adjust height automatically */
+            }
+            .plot-window {
+                width: 100%; /* Full width for smaller screens */
+                height: 300px; /* Adjust height for smaller screens */
+            }
+            .button-container {
+                flex-wrap: wrap; /* Allow buttons to wrap to the next line */
+                justify-content: center; /* Center buttons */
+            }
+            .matrix-button, .toggle-button {
+                width: 45%; /* Adjust button width for smaller screens */
+                margin: 5px auto; /* Add margin for spacing */
+            }
+            .param-container {
+                display: flex;
+                flex-direction: column; /* Stack input containers vertically */
+                gap: 10px; /* Add spacing between input containers */
+            }
+            .input-container {
+                width: 100%; /* Ensure input containers take full width */
+            }
+        }
+
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
         @media (max-width: 768px) {
             body {
                 flex-direction: column; /* Stack panels vertically */
@@ -286,7 +446,13 @@
         .param-section {
             font-size: 1.2em; /* Increase font size */
             font-weight: bold; /* Make text bold */
+<<<<<<< HEAD
         }
+=======
+
+        }
+        /* Target only the Parameters heading */
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
         input[type="text"] {
             width: 80%; /* Decrease width to 80% of the container */
             padding: 8px 10px; /* Add padding for better usability */
@@ -323,10 +489,18 @@
 .param-subheading {
     font-size: 1.1em;
     font-weight: bold;
+<<<<<<< HEAD
     margin-top: 10px;
     margin-bottom: 5px;
     color: #333; /* Dark gray for better readability */
 }
+=======
+    margin-bottom: 5px;
+    color: #333; /* Dark gray for better readability */
+    text-align: center; /* Center the headings */
+}
+
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
 .param-subsection {
     margin-bottom: 15px; /* Add spacing between subsections */
 }
@@ -404,16 +578,34 @@
 /* Ion Grid Layout */
 .ion-grid {
     display: grid;
+<<<<<<< HEAD
     grid-template-columns: 1fr 1fr; /* Two equal columns */
     gap: 10px; /* Space between grid items */
     align-items: center; /* Align items vertically */
+=======
+    justify-items: start;
+    text-align: left;
+    margin-left: 0;
+    grid-template-columns: 0.75r 0.4fr 0.4fr; /* Two equal columns */
+    gap: 2px; /* Ensure 10px space between grid items */
+    align-items: center; /* Align items vertically */
+    width: 100%; /* Ensure the grid takes full width of the container */
+    box-sizing: border-box; /* Include padding and borders in width calculation */
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
 }
 
 /* Individual Ion Cells */
 .ion-cell {
     display: flex;
+<<<<<<< HEAD
     flex-direction: column; /* Stack label and input vertically */
     gap: 5px; /* Space between label and input */
+=======
+    flex-direction: column;
+    gap: 2px; /* Minimal gap between label and input */
+    min-width: 0;
+    padding: 0; /* Remove extra padding */
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
 }
 
 /* Labels */
@@ -432,6 +624,18 @@
     border-radius: 5px; /* Rounded corners */
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); /* Subtle inner shadow */
     transition: border-color 0.3s, box-shadow 0.3s; /* Smooth transition for focus */
+<<<<<<< HEAD
+=======
+    box-sizing: border-box; /* Include padding and borders in width calculation */
+}
+
+/* Responsive Design for Smaller Screens */
+@media (max-width: 768px) {
+    .ion-grid {
+        grid-template-columns: 1fr; /* Stack inputs vertically on smaller screens */
+        gap: 10px; /* Maintain 10px spacing between rows */
+    }
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
 }
 
 /* Input Focus State */
@@ -451,6 +655,7 @@
     margin-bottom: 10px; /* Add spacing below */
 }
 
+<<<<<<< HEAD
 /* Tooltip Styling */
 button[data-tooltip] {
     position: relative; /* Ensure the button is the positioning context */
@@ -496,6 +701,22 @@ button[data-tooltip]:hover::before {
     visibility: visible; /* Show the tooltip and arrow */
     opacity: 1; /* Make them visible */
     transform: translateX(-50%) translateY(0); /* No vertical movement */
+=======
+.tooltip {
+    position: absolute;
+    z-index: 99999;
+    background: rgba(0, 0, 0, 0.92);
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 0.95em;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    pointer-events: none;
+    white-space: nowrap;
+    opacity: 0.97;
+    transition: opacity 0.2s, transform 0.2s;
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
 }
 
 /* Flexbox Layout for Body */
@@ -517,16 +738,22 @@ body {
     flex-direction: column;
     gap: 10px;
     overflow-y: auto; /* Enable vertical scrolling */
+<<<<<<< HEAD
     border-right: 1px solid black; /* Add a thin vertical black line */
+=======
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
     box-sizing: border-box; /* Include padding and borders in width calculation */
     font-family: inherit; /* Inherit font from body */
 }
 
+<<<<<<< HEAD
 /* Ensure content inside the left panel respects the padding */
 .left-panel * {
     box-sizing: border-box; /* Include padding and borders in width calculation */
 }
 
+=======
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
 /* Right Panel (Plot Section) */
 .right-panel {
     flex: 3; /* Allow the right panel to take up more space */
@@ -534,6 +761,10 @@ body {
     justify-content: center;
     align-items: center;
     font-family: inherit; /* Inherit font from body */
+<<<<<<< HEAD
+=======
+    background: #f9f9f6; 
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
 }
 
 /* Plot Window */
@@ -555,17 +786,169 @@ body {
         border-bottom: 1px solid black; /* Add horizontal line */
     }
 }
+<<<<<<< HEAD
         
     </style>
 </head>
 <body>
+=======
+
+/* Override text-transform for specific buttons */
+.generate-btn,
+.reset-btn,
+.ion-line-btn,
+.toggle-scale-btn,
+.region-btn.e-region,
+.region-btn.f-region {
+    text-transform: none; /* Prevent auto-capitalization */
+}
+
+/* Explicitly override text-transform for E-Region and F-Region buttons */
+.region-btn.e-region,
+.region-btn.f-region {
+    text-transform: none !important; /* Prevent auto-capitalization */
+}
+
+/* Centered welcome message overlay for the plot area */
+.welcome-message {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1001;
+    background: none;         /* Remove background bubble */
+    color: #000;              /* Make text black */
+    padding: 0;               /* Remove padding */
+    border-radius: 0;         /* Remove rounded corners */
+    font-size: 1.5em;
+    font-weight: bold;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1s ease;
+}
+.welcome-message.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.center-loading-message,
+.center-loading-message.secondary-message {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1002;
+    background: none;
+    color: #000; /* Black text */
+    font-size: 1.5em; /* Same size for both */
+    font-weight: bold;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 2s ease;
+    width: 100%;
+    max-width: 600px;
+}
+
+.center-loading-message {
+    top: 46%; /* Center vertically, adjust as needed */
+}
+
+.center-loading-message.secondary-message {
+    top: 53%; /* Slightly below the first message */
+}
+
+.center-loading-message.visible,
+.center-loading-message.secondary-message.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.parameters-heading {
+    font-size: 1.3em;
+}
+
+/* General button style */
+.button,
+.matrix-button,
+.toggle-button,
+.region-btn,
+.ion-line-btn,
+.toggle-scale-btn {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12), 0 1.5px 4px rgba(0,0,0,0.08);
+    background-image: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(0,0,0,0.06) 100%);
+    /* Keep existing background-color and font settings */
+    transition: box-shadow 0.2s, background-image 0.2s;
+}
+
+/* On hover, increase shadow and gradient effect */
+.button:hover,
+.matrix-button:hover,
+.toggle-button:hover,
+.region-btn:hover,
+.ion-line-btn:hover,
+.toggle-scale-btn:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.12);
+    background-image: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(0,0,0,0.10) 100%);
+}
+
+.param-section,
+.parameters-heading {
+    text-shadow: 0 2px 6px rgba(0,0,0,0.10), 0 1px 2px rgba(0,0,0,0.08);
+}
+
+/* Parameter subheadings (e.g., Basic, Advanced) */
+.param-subheading {
+    text-shadow: 0 1.5px 4px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08);
+}
+
+/* Titles for the inputs (inside .input-container) */
+.input-container > div {
+    text-shadow: 0 1px 3px rgba(0,0,0,0.10);
+}
+
+/* Fade-in animation keyframes */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Initial state for fade-in elements */
+.fade-in {
+    opacity: 0;
+    animation: fadeIn 0.8s forwards;
+}
+
+/* Delay for input sections */
+.fade-in-delayed {
+    opacity: 0;
+    animation: fadeIn 0.8s forwards;
+    animation-delay: 0.6s;
+}
+
+#ion-percentage-total {
+    display: block;
+    width: 100%;
+    text-align: center;
+    margin: 0 auto 10px auto;
+    font-weight: bold;
+}
+    </style>
+</head>
+<body>
+    <div id="tooltip" class="tooltip" style="display:none; position:absolute; z-index:99999;"></div>
+    <span id="error-message" class="error-message">Error: Something went wrong!</span>
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
     <div class="left-panel">
         <div class="button-container">
             <button class="button generate-btn" data-tooltip="Generate Selected Plot" >Generate Plot</button>
             <button class="button reset-btn" onclick="resetValues()" data-tooltip="Reset all parameter values" >Reset</button>
             <button class="button ion-line-btn" onclick="zoomToIonLine()" data-tooltip="Focus on center" >Ion Line</button>
+<<<<<<< HEAD
             <span id="error-message" class="error-message">Error: Something went wrong!</span>
             <div id="loading-message" class="loading-message">Generating plot, please wait...</div>
+=======
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
         </div>
         <div class="profile-row">
             <div>
@@ -586,10 +969,17 @@ body {
             <button class="button region-btn" style="background-color: #800080;" onclick="setERegion()" data-tooltip="Fill All Parameter Values">E-Region</button>
             <button class="button region-btn" style="background-color: #a020f0;" onclick="setFRegion()" data-tooltip="Fill All Parameter Values">F-Region</button>
         </div>
+<<<<<<< HEAD
         <div class="param-section">Variable Parameters</div>
         <div class="param-container" id="variable-params">
             <div class="param-subsection">
                 <div class="param-subheading">Basic Parameters</div>
+=======
+        <div class="param-section parameters-heading">Parameters</div>
+        <div class="param-container" id="variable-params">
+            <div class="param-subsection">
+                <div class="param-subheading">Basic</div>
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
                 <div class="input-container">
                     <div>Radar Frequency [Hz]</div>
                     <input type="text" id="frequency" value="430e6"> <!-- Default value: 430 MHz -->
@@ -613,7 +1003,11 @@ body {
             </div>
             
             <div class="param-subsection">
+<<<<<<< HEAD
                 <div class="param-subheading">Advanced Parameters</div>
+=======
+                <div class="param-subheading">Advanced</div>
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
                 <div class="input-container">
                     <div>Ion Collision Frequency [Hz]</div>
                     <input type="text" id="nu_i" value="1.0e-7">
@@ -634,16 +1028,68 @@ body {
                     <div>Magnetic Field [T]</div>
                     <input type="text" id="B" value="3.6e-5">
                 </div>
+<<<<<<< HEAD
                 <div class="input-container">
                     <div>N Terms [unitless] <i style="font-size: smaller;">odd values will center the plot at 0</i></div>
                     <input type="text" id="n_terms" value="2001">
                 </div>
+=======
+                <div class="input-container" style="position: relative;">
+    <div style="display: flex; align-items: center;">
+        N Terms [unitless]
+        <button id="nterms-info-btn" type="button" aria-label="Show info" style="
+            margin-left: 8px;
+            background: none;
+            border: none;
+            color: #007BFF;
+            font-size: 1.1em;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+        ">
+            <span style="
+                display: inline-block;
+                width: 1.2em;
+                height: 1.2em;
+                border-radius: 50%;
+                background: #e9f3ff;
+                color: #007BFF;
+                text-align: center;
+                font-weight: bold;
+                font-size: 1em;
+                line-height: 1.2em;
+                border: 1px solid #007BFF;
+            ">i</span>
+        </button>
+    </div>
+    <input type="text" id="n_terms" value="2001">
+    <div id="nterms-info-text" style="
+    display: none;
+    margin-top: 6px;
+    font-size: 0.95em;
+    color: #333;
+    background: #f8f9fa;
+    border: 1px solid #cce5ff;
+    border-radius: 5px;
+    padding: 6px 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+">
+    <ul style="margin: 0; padding-left: 18px;">
+        <li>Odd values will center the plot at '0'</li>
+        <li>Large values will increase the plot generation time</li>
+        <li>Small values may distort the generated plot</li>
+    </ul>
+</div>
+</div>
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
                 
             </div>
         </div>
 
         <div class="param-section">Ion Species Fractions & Densities</div>
 <div class="param-container ion-grid">
+<<<<<<< HEAD
     <!-- Total Ion Percentage -->
     <div class="ion-total" id="ion-percentage-total">
         Total Ion Percentage: 100%
@@ -705,10 +1151,82 @@ body {
     </div>
     <div class="ion-cell">
         <label for="NOplus_fraction">NO<sup>+</sup> Fraction (%)</label>
+=======
+    <!-- Total Ion Percentage above headers, spanning all columns -->
+    <div class="ion-total" id="ion-percentage-total" style="grid-column: span 3; text-align: center;">
+        Total Ion Percentage: 100%
+    </div>
+    <!-- Headers for columns -->
+    <div class="ion-cell" style="font-weight: bold; text-align: center;">Ion</div>
+    <div class="ion-cell" style="font-weight: bold; text-align: center;">Density [m⁻³]</div>
+    <div class="ion-cell" style="font-weight: bold; text-align: center;">Fraction (%)</div>
+    <!-- Row 1: O+ -->
+    <div class="ion-cell" style="text-align: center;">
+        <label for="Oplus_density">O<sup>+</sup></label>
+    </div>
+    <div class="ion-cell">
+        <input type="text" id="Oplus_density" value="2.03e5">
+    </div>
+    <div class="ion-cell">
+        <input type="text" id="Oplus_fraction" value="48.8" oninput="updateIonPercentageTotal()">
+    </div>
+    <!-- Row 2: N+ -->
+    <div class="ion-cell" style="text-align: center;">
+        <label for="Nplus_density">N<sup>+</sup></label>
+    </div>
+    <div class="ion-cell">
+        <input type="text" id="Nplus_density" value="1.33e4">
+    </div>
+    <div class="ion-cell">
+        <input type="text" id="Nplus_fraction" value="3.2" oninput="updateIonPercentageTotal()">
+    </div>
+    <!-- Row 3: H+ -->
+    <div class="ion-cell" style="text-align: center;">
+        <label for="Hplus_density">H<sup>+</sup></label>
+    </div>
+    <div class="ion-cell">
+        <input type="text" id="Hplus_density" value="1.89e5">
+    </div>
+    <div class="ion-cell">
+        <input type="text" id="Hplus_fraction" value="45.6" oninput="updateIonPercentageTotal()">
+    </div>
+    <!-- Row 4: He+ -->
+    <div class="ion-cell" style="text-align: center;">
+        <label for="Heplus_density">He<sup>+</sup></label>
+    </div>
+    <div class="ion-cell">
+        <input type="text" id="Heplus_density" value="9.96e3">
+    </div>
+    <div class="ion-cell">
+        <input type="text" id="Heplus_fraction" value="2.4" oninput="updateIonPercentageTotal()">
+    </div>
+    <!-- Row 5: O2+ -->
+    <div class="ion-cell" style="text-align: center;">
+        <label for="O2plus_density">O<sub>2</sub><sup>+</sup></label>
+    </div>
+    <div class="ion-cell">
+        <input type="text" id="O2plus_density" value="0">
+    </div>
+    <div class="ion-cell">
+        <input type="text" id="O2plus_fraction" value="0" oninput="updateIonPercentageTotal()">
+    </div>
+    <!-- Row 6: NO+ -->
+    <div class="ion-cell" style="text-align: center;">
+        <label for="NOplus_density">NO<sup>+</sup></label>
+    </div>
+    <div class="ion-cell">
+        <input type="text" id="NOplus_density" value="0">
+    </div>
+    <div class="ion-cell">
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
         <input type="text" id="NOplus_fraction" value="0" oninput="updateIonPercentageTotal()">
     </div>
 </div>
 
+<<<<<<< HEAD
+=======
+<!--
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
         <div class="param-section"> Constant Parameters  <i style="font-size: smaller;"></i></div>
         <div class="param-container" id="constant-params">
             <div class="input-container">
@@ -724,17 +1242,226 @@ body {
                 <input type="text" id="e" value="1.602e-19">
             </div>
         </div>
+<<<<<<< HEAD
     </div>
     <div class="right-panel">
+=======
+    -->
+
+    </div>
+    <div class="right-panel">
+        <div id="loading-message" class="loading-message">Generating plot...</div>
+        <div id="welcome-message" class="welcome-message">
+    Welcome! Click "Generate Plot" to begin.
+</div>
+
+<div id="center-loading-message" class="center-loading-message">
+    Change the parameters to create different spectra.
+</div>
+
+<div id="center-loading-message-2" class="center-loading-message secondary-message">
+    Use the buttons to create multiple plots at once and focus on specific features. 
+</div>
+
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
         <div id="plot" class="plot-window plot-data"></div>
     </div>
     <script>
 
+<<<<<<< HEAD
 function formatNumberWithCommas(input) {
     // Parse the input value as a float
     let value = parseFloat(input.value.replace(/,/g, ''));
     if (!isNaN(value)) {
         // Format the number with commas
+=======
+        let currentLoadingMessage = "Generating plot, please wait.";
+        let centerMessagesFadedOnce = false;
+        let loadingInterval = null;
+let loadingDots = 0;
+let defaultParamsSnapshot = null;
+
+function showLoadingMessageWhenCenterMessagesVisible() {
+    const centerMsg1 = document.getElementById("center-loading-message");
+    const centerMsg2 = document.getElementById("center-loading-message-2");
+    const loadingMessage = document.getElementById("loading-message");
+
+    function checkOpacityAndShow() {
+        const opacity1 = parseFloat(window.getComputedStyle(centerMsg1).opacity);
+        const opacity2 = parseFloat(window.getComputedStyle(centerMsg2).opacity);
+
+        if (opacity1 === 1 && opacity2 === 1) {
+            loadingMessage.classList.add("visible");
+            loadingMessage.textContent = "Calculating spectra";
+        } else {
+            // Check again in 100ms until both are fully visible
+            setTimeout(checkOpacityAndShow, 100);
+        }
+    }
+
+    checkOpacityAndShow();
+}
+
+// Helper to get current parameter values (excluding ion_species for simplicity)
+function getCurrentParams() {
+    let params = {};
+    document.querySelectorAll("input").forEach(input => {
+        params[input.id] = input.value;
+    });
+    return params;
+}
+
+// Helper to compare two parameter objects
+function paramsAreDefault(current, defaults) {
+    for (let key in defaults) {
+        if (current[key] !== defaults[key]) return false;
+    }
+    return true;
+}
+
+// Show/hide the center loading message
+function showCenterLoadingMessage() {
+    document.getElementById("center-loading-message").classList.add("visible");
+}
+function hideCenterLoadingMessage() {
+    const msg1 = document.getElementById("center-loading-message");
+    const msg2 = document.getElementById("center-loading-message-2");
+    msg1.classList.remove("visible");
+    msg2.classList.remove("visible");
+    if (window.centerMsgTimeout) clearTimeout(window.centerMsgTimeout);
+
+    // Only set the flag and show loading after fade-out completes (matches CSS transition)
+    setTimeout(() => {
+        centerMessagesFadedOnce = true;
+        maybeShowLoadingMessage();
+    }, 2000); // 2s matches your .center-loading-message transition
+}
+
+function maybeShowLoadingMessage() {
+    const loadingMessage = document.getElementById("loading-message");
+    const plotElement = document.getElementById("plot");
+    // If the plot is already visible, do NOT show the loading message
+    if (plotElement.classList.contains("visible")) {
+        loadingMessage.classList.remove("visible");
+        return;
+    }
+    if (centerMessagesFadedOnce) {
+        startLoadingMessage("Calculating spectra");
+    }
+}
+
+function showCenterLoadingMessage() {
+    const welcomeMsg = document.getElementById("welcome-message");
+    // Only show center messages if welcome message is NOT visible
+    if (welcomeMsg && welcomeMsg.classList.contains("visible")) {
+        // Do nothing if welcome message is visible
+        return;
+    }
+    document.getElementById("center-loading-message").classList.add("visible");
+    setTimeout(() => {
+        document.getElementById("center-loading-message-2").classList.add("visible");
+    }, 1200);
+
+    if (window.centerMsgTimeout) clearTimeout(window.centerMsgTimeout);
+    window.centerMsgTimeout = setTimeout(() => {
+        hideCenterLoadingMessage();
+    }, 30000);
+}
+
+// On page load, snapshot the default parameters
+window.addEventListener('DOMContentLoaded', function() {
+    defaultParamsSnapshot = getCurrentParams();
+});
+
+const loadingPhrases = [
+    "Sending parameters to server",    // 2
+    "Calculating spectra",             // 3
+    "Generating plot, please wait.",   // 1
+    "Rendering plot"                   // 4
+];
+
+let loadingPhraseIndex = 0;
+let loadingPhraseTimer = null;
+let loadingCycleDuration = 2000; // Default to 2s, will be set dynamically
+
+function startLoadingMessage(message, delayedByCenterMessages = false) {
+    const loadingMessage = document.getElementById("loading-message");
+    loadingPhraseIndex = 0;
+    loadingMessage.classList.add("visible");
+
+    loadingCycleDuration = delayedByCenterMessages ? 2000 : 20000;
+
+    function cyclePhrases() {
+        if (loadingPhraseIndex < loadingPhrases.length - 1) {
+            loadingMessage.textContent = loadingPhrases[loadingPhraseIndex];
+            loadingPhraseIndex++;
+            loadingPhraseTimer = setTimeout(cyclePhrases, loadingCycleDuration / loadingPhrases.length);
+        } else {
+            loadingMessage.textContent = loadingPhrases[loadingPhrases.length - 1];
+        }
+    }
+
+    cyclePhrases();
+    loadingDots = 0;
+    clearInterval(loadingInterval); // Prevent multiple intervals
+    loadingInterval = setInterval(() => {
+        // Only show dots, not append
+        let baseText = loadingMessage.textContent.split('.')[0]; // Remove any previous dots
+        loadingMessage.textContent = baseText + ".".repeat(loadingDots);
+        loadingDots = (loadingDots + 1) % 4;
+    }, 500);
+}
+
+function stopLoadingMessage() {
+    const loadingMessage = document.getElementById("loading-message");
+    clearInterval(loadingInterval);
+    clearTimeout(loadingPhraseTimer);
+    loadingMessage.classList.remove("visible");
+}
+
+// Show welcome message on page load
+window.addEventListener('DOMContentLoaded', function() {
+    const welcomeMsg = document.getElementById("welcome-message");
+    setTimeout(() => {
+        welcomeMsg.classList.add("visible");
+    }, 1750); // Fade in after short delay
+});
+
+// Hide welcome message after first plot
+let firstPlotGenerated = false;
+function hideWelcomeMessage() {
+    const welcomeMsg = document.getElementById("welcome-message");
+    if (welcomeMsg && welcomeMsg.classList.contains("visible")) {
+        welcomeMsg.classList.remove("visible");
+    }
+}
+
+document.querySelectorAll('button[data-tooltip]').forEach(button => {
+    button.addEventListener('mouseenter', () => {
+        const tooltip = button.querySelector('::after');
+        const tooltipRect = button.getBoundingClientRect();
+        const leftPanelRect = document.querySelector('.left-panel').getBoundingClientRect();
+
+        // Check if the tooltip overflows the right edge of the left panel
+        if (tooltipRect.right > leftPanelRect.right) {
+            button.style.setProperty('--tooltip-left', 'auto');
+            button.style.setProperty('--tooltip-right', '10px'); // Adjust to stay within the container
+        } else {
+            button.style.setProperty('--tooltip-left', '50%');
+            button.style.setProperty('--tooltip-right', 'auto');
+        }
+    });
+});
+
+function formatNumberWithCommas(input) {
+    let raw = input.value.replace(/,/g, '');
+    let value = Number(raw);
+
+    // If the input contains 'e' (exponential notation) or is very small, do not format
+    if (raw.includes('e') || Math.abs(value) < 0.01) {
+        input.value = raw;
+    } else if (!isNaN(value)) {
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
         input.value = value.toLocaleString('en-US');
     }
 }
@@ -745,8 +1472,15 @@ function removeNumberFormatting(input) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+<<<<<<< HEAD
     // Select all input fields that may contain large numbers
     const numericInputs = document.querySelectorAll('#variable-params input[type="text"], #ion-species-params input[type="text"]');
+=======
+    // Select all input fields in both variable params and ion grid
+    const numericInputs = document.querySelectorAll(
+        '#variable-params input[type="text"], .ion-grid input[type="text"]'
+    );
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
 
     numericInputs.forEach(input => {
         input.addEventListener('blur', function () {
@@ -776,11 +1510,19 @@ function updateIonPercentageTotal() {
     const totalElement = document.getElementById("ion-percentage-total");
     totalElement.textContent = `Total Ion Percentage: ${totalPercentage.toFixed(2)}%`;
 
+<<<<<<< HEAD
     // Change the color if the total is not 100%
     if (totalPercentage !== 100) {
         totalElement.style.color = "red";
     } else {
         totalElement.style.color = "#333"; // Default dark gray
+=======
+    // Change the color only if the total exceeds 100%
+    if (totalPercentage > 100) {
+        totalElement.style.color = "red"; // Turn red if over 100%
+    } else {
+        totalElement.style.color = "#333"; // Default dark gray otherwise
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
     }
 }
         window.onload = function () {
@@ -790,7 +1532,11 @@ function updateIonPercentageTotal() {
         let selectedProfile = "Plot1"; // Default to Button 1
         let plotData = []; // Store all plots
         let visibility = { "Plot1": true, "Plot2": true, "Plot3": true }; // Track visibility state
+<<<<<<< HEAD
         let firstPlotGenerated = false; // Track if the first plot has been generated
+=======
+        firstPlotGenerated = false; // Track if the first plot has been generated
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
 
         const buttons = document.querySelectorAll(".matrix-button");
         buttons.forEach(button => {
@@ -828,15 +1574,38 @@ function updateIonPercentageTotal() {
             });
         });
 
+<<<<<<< HEAD
         function generatePlot() {
     // Declare the errorMessage variable at the top
     const errorMessage = document.getElementById("error-message");
+=======
+        function updateLoadingMessage(message) {
+    currentLoadingMessage = message;
+    const loadingMessage = document.getElementById("loading-message");
+    loadingMessage.textContent = currentLoadingMessage + ".".repeat(loadingDots);
+}
+
+        function generatePlot() {
+    // Tooltip logic: always set "Generating Plot..." when plot starts
+    const genBtn = document.querySelector('.generate-btn');
+    if (genBtn) {
+        if (!genBtn.dataset.origTooltip) genBtn.dataset.origTooltip = genBtn.getAttribute('data-tooltip') || 'Generate Selected Plot';
+        window.isGeneratingPlot = true;
+        genBtn.setAttribute('data-tooltip', 'Generating Plot...');
+    }
+
+    hideWelcomeMessage();
+    const errorMessage = document.getElementById("error-message");
+    const plotElement = document.getElementById("plot");
+    errorMessage.style.display = "none";
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
 
     // Get the total ion percentage
     const totalPercentage = parseFloat(document.getElementById("ion-percentage-total").textContent.replace("Total Ion Percentage: ", "").replace("%", ""));
 
     // Check if the total percentage exceeds 100%
     if (totalPercentage > 100) {
+<<<<<<< HEAD
         errorMessage.textContent = "Ion percentage exceeds 100%, please edit the values and try again.";
         errorMessage.style.display = "inline"; // Show the error message
         return; // Stop the function execution
@@ -853,41 +1622,100 @@ function updateIonPercentageTotal() {
             name: "O+",
             fraction: parseFloat(document.getElementById("Oplus_fraction").value) / 100,
             density: parseFloat(document.getElementById("Oplus_density").value),
+=======
+        if (genBtn) {
+            window.isGeneratingPlot = false;
+            genBtn.setAttribute('data-tooltip', genBtn.dataset.origTooltip);
+        }
+        stopLoadingMessage();
+        hideCenterLoadingMessage();
+        errorMessage.textContent = "Ion percentage exceeds 100%, please edit the values and try again.";
+        errorMessage.style.display = "inline";
+        return;
+    }
+
+    let newValues = {};
+
+        // Build ion species array
+    updateLoadingMessage("Collecting ion species parameters");
+    function safeNumber(val) {
+        // Remove commas and trim whitespace
+        val = (val || "").replace(/,/g, "").trim();
+        // If empty, return null
+        if (val === "") return null;
+        // Use Number() to parse exponential notation correctly
+        let num = Number(val);
+        return isNaN(num) ? null : num;
+    }
+
+    // Build ion species array
+    const ion_species = [
+        {
+            name: "O+",
+            fraction: safeNumber(document.getElementById("Oplus_fraction").value) / 100,
+            density: safeNumber(document.getElementById("Oplus_density").value),
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
             mass: 2.65686e-26
         },
         {
             name: "N+",
+<<<<<<< HEAD
             fraction: parseFloat(document.getElementById("Nplus_fraction").value) / 100,
             density: parseFloat(document.getElementById("Nplus_density").value),
+=======
+            fraction: safeNumber(document.getElementById("Nplus_fraction").value) / 100,
+            density: safeNumber(document.getElementById("Nplus_density").value),
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
             mass: 2.32587e-26
         },
         {
             name: "H+",
+<<<<<<< HEAD
             fraction: parseFloat(document.getElementById("Hplus_fraction").value) / 100,
             density: parseFloat(document.getElementById("Hplus_density").value),
+=======
+            fraction: safeNumber(document.getElementById("Hplus_fraction").value) / 100,
+            density: safeNumber(document.getElementById("Hplus_density").value),
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
             mass: 1.67262e-27
         },
         {
             name: "HE+",
+<<<<<<< HEAD
             fraction: parseFloat(document.getElementById("Heplus_fraction").value) / 100,
             density: parseFloat(document.getElementById("Heplus_density").value),
+=======
+            fraction: safeNumber(document.getElementById("Heplus_fraction").value) / 100,
+            density: safeNumber(document.getElementById("Heplus_density").value),
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
             mass: 6.64648e-27
         },
         {
             name: "O2+",
+<<<<<<< HEAD
             fraction: parseFloat(document.getElementById("O2plus_fraction").value) / 100,
             density: parseFloat(document.getElementById("O2plus_density").value),
+=======
+            fraction: safeNumber(document.getElementById("O2plus_fraction").value) / 100,
+            density: safeNumber(document.getElementById("O2plus_density").value),
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
             mass: 5.31372e-26
         },
         {
             name: "NO+",
+<<<<<<< HEAD
             fraction: parseFloat(document.getElementById("NOplus_fraction").value) / 100,
             density: parseFloat(document.getElementById("NOplus_density").value),
+=======
+            fraction: safeNumber(document.getElementById("NOplus_fraction").value) / 100,
+            density: safeNumber(document.getElementById("NOplus_density").value),
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
             mass: 2.4828e-26
         }
     ];
     newValues["ion_species"] = ion_species;
 
+<<<<<<< HEAD
     const plotElement = document.getElementById("plot");
     const loadingMessage = document.getElementById("loading-message");
 
@@ -902,11 +1730,36 @@ function updateIonPercentageTotal() {
         newValues[input.id] = parseFloat(input.value);
     });
 
+=======
+    // Collect all other input values
+    document.querySelectorAll("input").forEach(input => {
+        let num = safeNumber(input.value);
+        if (num !== null) {
+            newValues[input.id] = num;
+        }
+        // Optionally, highlight invalid fields:
+        else {
+            input.style.borderColor = "red";
+        }
+    });
+
+    // Delay showing center messages until welcome message is faded out
+    setTimeout(() => {
+        if (!firstPlotGenerated && paramsAreDefault(getCurrentParams(), defaultParamsSnapshot)) {
+            showCenterLoadingMessage();
+        } else {
+            startLoadingMessage("Calculating spectra");
+        }
+    }, 1000);
+
+    updateLoadingMessage("Sending parameters to server");
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
     fetch('/update_values', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newValues)
     })
+<<<<<<< HEAD
     .then(() => fetch('/plot'))
     .then(response => response.json())
     .then(data => {
@@ -914,6 +1767,17 @@ function updateIonPercentageTotal() {
 
         let colors = { "Plot 1": "blue", "Plot 2": "red", "Plot 3": "green" };
 
+=======
+    .then(() => {
+        updateLoadingMessage("Calculating spectra");
+        return fetch('/plot');
+    })
+    .then(response => response.json())
+    .then(data => {
+        updateLoadingMessage("Rendering plot");
+        let colors = { "Plot 1": "blue", "Plot 2": "red", "Plot 3": "green" };
+        let currentProfile = selectedProfile;
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
         let trace = {
             x: data.frequencies,
             y: data.spectra,
@@ -939,6 +1803,7 @@ function updateIonPercentageTotal() {
         };
 
         Plotly.newPlot('plot', plotData, layout, { responsive: true });
+<<<<<<< HEAD
 
         // Apply fade-in effect
         plotElement.classList.add('visible');
@@ -951,6 +1816,29 @@ function updateIonPercentageTotal() {
     })
     .finally(() => {
         loadingMessage.style.display = "none"; // Hide the loading message
+=======
+        plotElement.classList.add('visible');
+
+        // Restore tooltip and state
+        if (genBtn) {
+            window.isGeneratingPlot = false;
+            genBtn.setAttribute('data-tooltip', genBtn.dataset.origTooltip);
+        }
+        stopLoadingMessage();
+        hideCenterLoadingMessage();
+        firstPlotGenerated = true;
+    })
+    .catch(error => {
+        if (genBtn) {
+            window.isGeneratingPlot = false;
+            genBtn.setAttribute('data-tooltip', genBtn.dataset.origTooltip);
+        }
+        stopLoadingMessage();
+        document.getElementById("loading-message").style.opacity = "0";
+        hideCenterLoadingMessage();
+        errorMessage.textContent = `Error generating plot. Please check your inputs and try again.`;
+        errorMessage.style.display = "inline";
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
     });
 }
 
@@ -1175,6 +2063,121 @@ function setFRegion() {
     document.getElementById("O2plus_density").value = 0;
     document.getElementById("NOplus_density").value = 0;
 }
+<<<<<<< HEAD
     </script>
 </body>
 </html>
+=======
+
+document.querySelectorAll('button[data-tooltip]').forEach(button => {
+    button.addEventListener('mouseenter', function() {
+        button.classList.remove('tooltip-align-left');
+        // Measure tooltip width
+        const tooltipText = button.getAttribute('data-tooltip');
+        const tempTooltip = document.createElement('div');
+        tempTooltip.style.position = 'absolute';
+        tempTooltip.style.visibility = 'hidden';
+        tempTooltip.style.whiteSpace = 'nowrap';
+        tempTooltip.style.fontSize = '0.95em';
+        tempTooltip.style.fontWeight = 'normal';
+        tempTooltip.style.padding = '6px 12px';
+        tempTooltip.textContent = tooltipText;
+        document.body.appendChild(tempTooltip);
+        const tooltipWidth = tempTooltip.offsetWidth;
+        document.body.removeChild(tempTooltip);
+
+        // Get button and left panel positions
+        const buttonRect = button.getBoundingClientRect();
+        const leftPanelRect = document.querySelector('.left-panel').getBoundingClientRect();
+
+        // If tooltip would overflow right edge of left panel, align left
+        const tooltipRight = buttonRect.right + 10 + tooltipWidth;
+        if (tooltipRight > leftPanelRect.right) {
+            button.classList.add('tooltip-align-left');
+        }
+    });
+    button.addEventListener('mouseleave', function() {
+        button.classList.remove('tooltip-align-left');
+    });
+});
+
+window.addEventListener('DOMContentLoaded', function() {
+    // Fade in button containers
+    document.querySelectorAll('.button-container, .profile-row').forEach(el => {
+        el.classList.add('fade-in');
+    });
+    // Fade in input sections after buttons
+    document.querySelectorAll('.param-section, .param-container').forEach(el => {
+        el.classList.add('fade-in-delayed');
+    });
+});
+
+document.getElementById('nterms-info-btn').addEventListener('click', function() {
+        const info = document.getElementById('nterms-info-text');
+        info.style.display = (info.style.display === 'none' || info.style.display === '') ? 'block' : 'none';
+    });
+
+    (function() {
+    const genBtn = document.querySelector('.generate-btn');
+    if (!genBtn) return;
+
+    // Store the original tooltip text
+    genBtn.dataset.origTooltip = genBtn.getAttribute('data-tooltip') || 'Generate Selected Plot';
+
+    // Track whether a plot is being generated
+    window.isGeneratingPlot = false;
+
+    // Wrap startLoadingMessage to set the tooltip and flag
+    if (typeof window.startLoadingMessage === 'function') {
+        const _start = window.startLoadingMessage;
+        window.startLoadingMessage = function(message, delayedByCenterMessages = false) {
+            window.isGeneratingPlot = true;
+            genBtn.setAttribute('data-tooltip', 'Generating Plot...');
+            return _start.apply(this, arguments);
+        };
+    }
+
+    // Wrap stopLoadingMessage to restore the tooltip and flag
+    if (typeof window.stopLoadingMessage === 'function') {
+        const _stop = window.stopLoadingMessage;
+        window.stopLoadingMessage = function() {
+            window.isGeneratingPlot = false;
+            genBtn.setAttribute('data-tooltip', genBtn.dataset.origTooltip);
+            return _stop.apply(this, arguments);
+        };
+    }
+
+    // On hover, always show the correct tooltip
+    genBtn.addEventListener('mouseenter', function() {
+        if (window.isGeneratingPlot) {
+            this.setAttribute('data-tooltip', 'Generating Plot...');
+        } else {
+            this.setAttribute('data-tooltip', this.dataset.origTooltip);
+        }
+    });
+    genBtn.addEventListener('mouseleave', function() {
+        this.setAttribute('data-tooltip', window.isGeneratingPlot ? 'Generating Plot...' : this.dataset.origTooltip);
+    });
+})();
+
+document.querySelectorAll('button[data-tooltip]').forEach(button => {
+    button.addEventListener('mouseenter', function(e) {
+        const tooltip = document.getElementById('tooltip');
+        tooltip.textContent = button.getAttribute('data-tooltip');
+        tooltip.style.display = 'block';
+
+        // Position tooltip to the right and vertically centered with the button
+        const rect = button.getBoundingClientRect();
+        tooltip.style.left = (rect.right + window.scrollX + 3) + 'px';
+        tooltip.style.top = (rect.top + window.scrollY + rect.height/2 - tooltip.offsetHeight/2) + 'px';
+    });
+
+    button.addEventListener('mouseleave', function() {
+        const tooltip = document.getElementById('tooltip');
+        tooltip.style.display = 'none';
+    });
+});
+    </script>
+</body>
+</html>
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
