@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live ISR Spectra Plot</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* Apply San Francisco Pro font to the entire page */
+        body {
+            font-family: "San Francisco Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            margin: 0;
+        }
+        .left-panel {
+            width: 25%;
+            background: #f4f4f4;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto; /* Enable vertical scrolling */
+            direction: rtl; /* Reverse the direction to move the scrollbar to the left */
+            border-right: 1px solid black; /* Add a thin vertical black line */
+            font-family: inherit; /* Inherit font from body */
+        }
+        .left-panel * {
+            direction: ltr; /* Ensure the content inside the panel remains left-to-right */
+        }
+        .left-panel::-webkit-scrollbar {
+            width: 10px; /* Width of the scrollbar */
+        }
+        .left-panel::-webkit-scrollbar-track {
+            background: #f4f4f4; /* Background of the scrollbar track */
+            border-radius: 5px; /* Rounded corners for the track */
+        }
+        .left-panel::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.5); /* Decrease opacity for more transparency */
+            border-radius: 5px; /* Rounded corners for the thumb */
+            border: 2px solid #f4f4f4; /* Border remains the same */
+        }
+        .left-panel::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.7); /* Slightly less transparent on hover */
+        }
+        .right-panel {
+            width: 75%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: inherit; /* Inherit font from body */
+        }
+        .plot-window {
+            width: 90%; /* Increase width to take up more space */
+            height: 90%; /* Increase height to take up more space */
+            max-width: 1000px; /* Adjust maximum width */
+            max-height: 800px; /* Adjust maximum height */
+            border: 1px solid #ccc;
+        }
+        .plot-data {
+            opacity: 0; /* Start hidden */
+            transition: opacity 1s ease-in-out; /* Add fade-in transition */
+        }
+        .plot-data.visible {
+            opacity: 1; /* Make visible */
+        }
+        .button-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 5px; /* Decrease space below the row of generate/reset buttons */
+        }
+        .button {
+            padding: 10px 20px;
+            font-size: 1.1em; /* Match font size of plot buttons */
+            font-weight: bold; /* Match bold text style of plot buttons */
+            text-transform: uppercase; /* Ensure text is uppercase like plot buttons */
+            letter-spacing: 1px; /* Add spacing between letters for consistency */
+            cursor: pointer;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            font-family: inherit; /* Inherit font from body */
+        }
+        /* Generate Plot Button */
+.generate-btn {
+    background-color: #007BFF; /* Blue */
+    color: white;
+}
+.generate-btn:hover {
+    background-color: #0056B3; /* Darker Blue */
+}
+
+/* Reset Button */
+.reset-btn {
+    background-color: #DC3545; /* Red */
+    color: white;
+}
+.reset-btn:hover {
+    background-color: #A71D2A; /* Darker Red */
+}
+        .input-container {
+            margin-bottom: 5px;
+        }
+        .error-message {
+            display: none;
+            margin-left: 10px; /* Position to the right of the reset button */
+            color: red;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        .matrix-button {
+            width: 100px;
+            height: 50px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            background-color: #6c757d; /* Default gray color */
+            transition: background-color 0.3s;
+            margin-bottom: 5px;
+            font-family: inherit; /* Inherit font from body */
+        }
+        .matrix-button:hover {
+            background-color: #5a6268; /* Darker gray on hover */
+        }
+        .blue-button {
+            background-color: #20C997 !important; /* Match "Generate Plot" button */
+        }
+        .blue-button:hover {
+            background-color: #198754 !important; /* Match "Generate Plot" hover */
+        }
+        .toggle-button {
+            padding: 5px 15px; /* Decrease size of toggle buttons */
+            font-size: 0.9em; /* Adjust font size */
+            cursor: pointer;
+            color: black;
+            border: none;
+            border-radius: 5px;
+            background-color: #FFC107; /* Green color for toggle buttons */
+            transition: background-color 0.3s;
+            margin-left: 5px; /* Add space between toggle buttons */
+            font-family: inherit; /* Inherit font from body */
+        }
+        .toggle-button:hover {
+            background-color: #E0A800; /* Darker green on hover */
+        }
+        .param-container, .input-container div, input {
+            font-family: inherit; /* Ensure parameter sections use the new font */
+        }
+        .loading-message {
+            display: none;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            z-index: 1000;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column; /* Stack panels vertically */
+            }
+            .left-panel {
+                width: 100%; /* Full width for smaller screens */
+                height: auto; /* Adjust height automatically */
+                border-right: none; /* Remove vertical line */
+                border-bottom: 1px solid black; /* Add horizontal line */
+            }
+            .right-panel {
+                width: 100%; /* Full width for smaller screens */
+                height: auto; /* Adjust height automatically */
+            }
+            .plot-window {
+                width: 100%; /* Full width for smaller screens */
+                height: 300px; /* Adjust height for smaller screens */
+            }
+            .button-container {
+                flex-wrap: wrap; /* Allow buttons to wrap to the next line */
+                justify-content: center; /* Center buttons */
+            }
+            .matrix-button, .toggle-button {
+                width: 45%; /* Adjust button width for smaller screens */
+                margin: 5px auto; /* Add margin for spacing */
+            }
+            .param-container {
+                display: flex;
+                flex-direction: column; /* Stack input containers vertically */
+                gap: 10px; /* Add spacing between input containers */
+            }
+            .input-container {
+                width: 100%; /* Ensure input containers take full width */
+            }
+        }
+
+        /* For screens larger than 1200px */
+        @media (min-width: 1200px) {
+            .left-panel {
+                width: 20%; /* Reduce left panel width */
+            }
+            .right-panel {
+                width: 80%; /* Increase right panel width */
+            }
+            .plot-window {
+                width: 95%; /* Slightly increase plot window width */
+                height: 95%; /* Slightly increase plot window height */
+            }
+        }
+
+        /* For screens between 768px and 1200px */
+        @media (min-width: 768px) and (max-width: 1200px) {
+            .left-panel {
+                width: 25%; /* Adjust left panel width */
+            }
+            .right-panel {
+                width: 75%; /* Adjust right panel width */
+            }
+            .plot-window {
+                width: 90%; /* Adjust plot window width */
+                height: 90%; /* Adjust plot window height */
+            }
+        }
+
+        /* For screens smaller than 768px */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column; /* Stack panels vertically */
+            }
+            .left-panel {
+                width: 100%; /* Full width for smaller screens */
+                height: auto; /* Adjust height automatically */
+                border-right: none; /* Remove vertical line */
+                border-bottom: 1px solid black; /* Add horizontal line */
+            }
+            .right-panel {
+                width: 100%; /* Full width for smaller screens */
+                height: auto; /* Adjust height automatically */
+            }
+            .plot-window {
+                width: 100%; /* Full width for smaller screens */
+                height: 300px; /* Adjust height for smaller screens */
+            }
+            .button-container {
+                flex-wrap: wrap; /* Allow buttons to wrap to the next line */
+                justify-content: center; /* Center buttons */
+            }
+            .matrix-button, .toggle-button {
+                width: 45%; /* Adjust button width for smaller screens */
+                margin: 5px auto; /* Add margin for spacing */
+            }
+        }
+
+        /* For screens smaller than 480px */
+        @media (max-width: 480px) {
+            .left-panel {
+                width: 100%; /* Full width for very small screens */
+                padding: 5px; /* Reduce padding */
+            }
+            .right-panel {
+                width: 100%; /* Full width for very small screens */
+            }
+            .plot-window {
+                height: 250px; /* Further reduce plot height */
+            }
+            .button-container {
+                flex-direction: column; /* Stack buttons vertically */
+                gap: 5px; /* Reduce gap between buttons */
+            }
+            .matrix-button, .toggle-button {
+                width: 100%; /* Full width for buttons */
+            }
+            .param-container {
+                gap: 5px; /* Reduce spacing between input containers */
+            }
+            .input-container {
+                width: 100%; /* Ensure input containers take full width */
+            }
+        }
+        .param-section {
+            font-size: 1.2em; /* Increase font size */
+            font-weight: bold; /* Make text bold */
+        }
+        input[type="text"] {
+            width: 80%; /* Decrease width to 80% of the container */
+            padding: 8px 10px; /* Add padding for better usability */
+            font-size: 1em; /* Adjust font size */
+            border: 1px solid #ccc; /* Add a light border */
+            border-radius: 5px; /* Rounded corners */
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); /* Subtle inner shadow */
+            transition: border-color 0.3s, box-shadow 0.3s; /* Smooth transition for focus */
+            font-family: inherit; /* Match font with the rest of the page */
+        }
+
+        input[type="text"]:focus {
+            border-color: #007BFF; /* Highlight border on focus */
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Add glow effect on focus */
+            outline: none; /* Remove default outline */
+        }
+
+        .toggle-scale-btn {
+            background-color: #17A2B8; /* Orange color */
+    color: white; /* White text */
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+.toggle-scale-btn:hover {
+    background-color: #117A8B; /* Darker orange on hover */
+}
+
+.param-subheading {
+    font-size: 1.1em;
+    font-weight: bold;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    color: #333; /* Dark gray for better readability */
+}
+.param-subsection {
+    margin-bottom: 15px; /* Add spacing between subsections */
+}
+
+.ion-line-btn {
+    background-color: #28A745; /* Green */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+.ion-line-btn:hover {
+    background-color: #218838; /* Darker green on hover */
+}
+
+.region-btn {
+    margin-left: 5px;
+    color: white;
+    font-weight: bold;
+}
+
+/* E-Region Button */
+.region-btn.e-region {
+    background-color: #800080; /* Purple */
+    color: white;
+}
+.region-btn.e-region:hover {
+    background-color: #5A005A; /* Darker Purple */
+}
+
+/* F-Region Button */
+.region-btn.f-region {
+    background-color: #A020F0; /* Violet */
+    color: white;
+}
+.region-btn.f-region:hover {
+    background-color: #7A1CBF; /* Darker Violet */
+}
+
+.tooltip-container {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip-text {
+    visibility: hidden;
+    width: max-content;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px 8px;
+    position: absolute;
+    z-index: 1;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 125%; /* Position above the button */
+    opacity: 0;
+    transition: opacity 0.2s;
+    font-size: 0.95em;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.tooltip-container:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Ion Grid Layout */
+.ion-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Two equal columns */
+    gap: 10px; /* Space between grid items */
+    align-items: center; /* Align items vertically */
+}
+
+/* Individual Ion Cells */
+.ion-cell {
+    display: flex;
+    flex-direction: column; /* Stack label and input vertically */
+    gap: 5px; /* Space between label and input */
+}
+
+/* Labels */
+.ion-cell label {
+    font-size: 0.9em; /* Slightly smaller font for labels */
+    font-weight: bold; /* Make labels bold */
+    color: #333; /* Dark gray for readability */
+}
+
+/* Inputs */
+.ion-cell input {
+    width: 100%; /* Full width of the cell */
+    padding: 8px; /* Add padding for better usability */
+    font-size: 1em; /* Match font size with other inputs */
+    border: 1px solid #ccc; /* Light border */
+    border-radius: 5px; /* Rounded corners */
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); /* Subtle inner shadow */
+    transition: border-color 0.3s, box-shadow 0.3s; /* Smooth transition for focus */
+}
+
+/* Input Focus State */
+.ion-cell input:focus {
+    border-color: #007BFF; /* Highlight border on focus */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Add glow effect on focus */
+    outline: none; /* Remove default outline */
+}
+
+/* Total Ion Percentage Display */
+.ion-total {
+    grid-column: span 2; /* Span across both columns */
+    font-size: 1em;
+    font-weight: bold;
+    color: #333; /* Default dark gray */
+    text-align: center; /* Center the text */
+    margin-bottom: 10px; /* Add spacing below */
+}
+
+/* Tooltip Styling */
+button[data-tooltip] {
+    position: relative; /* Ensure the button is the positioning context */
+}
+
+button[data-tooltip]::after {
+    content: attr(data-tooltip); /* Use the tooltip text from the data-tooltip attribute */
+    visibility: hidden; /* Hide the tooltip by default */
+    opacity: 0; /* Make the tooltip invisible */
+    background-color: #333; /* Dark background for the tooltip */
+    color: #fff; /* White text for the tooltip */
+    text-align: center;
+    border-radius: 5px; /* Rounded corners */
+    padding: 4px 8px; /* Smaller padding for smaller tooltips */
+    position: absolute;
+    z-index: 1;
+    top: 120%; /* Slightly increase space between tooltip and button */
+    left: 50%; /* Center the tooltip below the button */
+    transform: translateX(-50%);
+    font-size: 0.85em; /* Smaller font size */
+    white-space: nowrap; /* Prevent text wrapping */
+    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out; /* Smooth fade-in and slide-up effect */
+    pointer-events: none; /* Prevent interaction with the tooltip */
+}
+
+button[data-tooltip]::before {
+    content: '';
+    position: absolute;
+    top: calc(120% - 5px); /* Adjust arrow position to match tooltip */
+    left: 50%; /* Align the arrow with the tooltip */
+    transform: translateX(-50%);
+    border-width: 5px; /* Arrow size */
+    border-style: solid;
+    border-color: #333 transparent transparent transparent; /* Arrow pointing up */
+    visibility: hidden; /* Hide the arrow by default */
+    opacity: 0; /* Make the arrow invisible */
+    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out; /* Smooth fade-in and slide-up effect */
+}
+
+/* Show Tooltip on Hover */
+button[data-tooltip]:hover::after,
+button[data-tooltip]:hover::before {
+    visibility: visible; /* Show the tooltip and arrow */
+    opacity: 1; /* Make them visible */
+    transform: translateX(-50%) translateY(0); /* No vertical movement */
+}
+
+/* Flexbox Layout for Body */
+body {
+    display: flex;
+    flex-direction: row; /* Arrange panels side by side */
+    height: 100vh; /* Full viewport height */
+    margin: 0;
+}
+
+/* Left Panel (Input Section) */
+.left-panel {
+    flex: 1; /* Allow the left panel to resize proportionally */
+    min-width: 250px; /* Minimum width for usability */
+    max-width: 400px; /* Maximum width to prevent it from taking too much space */
+    background: #f4f4f4;
+    padding: 10px 25px 10px 10px; /* Add 25px padding on the right */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto; /* Enable vertical scrolling */
+    border-right: 1px solid black; /* Add a thin vertical black line */
+    box-sizing: border-box; /* Include padding and borders in width calculation */
+    font-family: inherit; /* Inherit font from body */
+}
+
+/* Ensure content inside the left panel respects the padding */
+.left-panel * {
+    box-sizing: border-box; /* Include padding and borders in width calculation */
+}
+
+/* Right Panel (Plot Section) */
+.right-panel {
+    flex: 3; /* Allow the right panel to take up more space */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: inherit; /* Inherit font from body */
+}
+
+/* Plot Window */
+.plot-window {
+    width: 90%; /* Adjust width to fit within the right panel */
+    height: 90%; /* Adjust height to fit within the right panel */
+    max-width: 1000px; /* Set a maximum width */
+    max-height: 800px; /* Set a maximum height */
+    border: 1px solid #ccc;
+}
+
+/* Responsive Design for Smaller Screens */
+@media (max-width: 768px) {
+    .left-panel {
+        width: 100%; /* Full width for smaller screens */
+        height: auto; /* Adjust height automatically */
+        padding: 10px 25px 10px 10px; /* Maintain 25px padding on the right */
+        border-right: none; /* Remove vertical line */
+        border-bottom: 1px solid black; /* Add horizontal line */
+    }
+}
+        
+    </style>
+</head>
+<body>
+    <div class="left-panel">
+        <div class="button-container">
+            <button class="button generate-btn" data-tooltip="Generate Selected Plot" >Generate Plot</button>
+            <button class="button reset-btn" onclick="resetValues()" data-tooltip="Reset all parameter values" >Reset</button>
+            <button class="button ion-line-btn" onclick="zoomToIonLine()" data-tooltip="Focus on center" >Ion Line</button>
+            <span id="error-message" class="error-message">Error: Something went wrong!</span>
+            <div id="loading-message" class="loading-message">Generating plot, please wait...</div>
+        </div>
+        <div class="profile-row">
+            <div>
+                <button class="matrix-button blue-button">Plot 1</button>
+                <button class="toggle-button" onclick="toggleVisibility(0)" data-tooltip="Toggle Visibility">Toggle Plot 1</button>
+            </div>
+            <div>
+                <button class="matrix-button">Plot 2</button>
+                <button class="toggle-button" onclick="toggleVisibility(1)" data-tooltip="Toggle Visibility">Toggle Plot 2</button>
+            </div>
+            <div>
+                <button class="matrix-button">Plot 3</button>
+                <button class="toggle-button" onclick="toggleVisibility(2)" data-tooltip="Toggle Visibility">Toggle Plot 3</button>
+            </div>
+        </div>
+        <div class="button-container">
+            <button class="button toggle-scale-btn" onclick="toggleScale()" data-tooltip="Toggle Logarithmic/Linear">Toggle Scale</button>
+            <button class="button region-btn" style="background-color: #800080;" onclick="setERegion()" data-tooltip="Fill All Parameter Values">E-Region</button>
+            <button class="button region-btn" style="background-color: #a020f0;" onclick="setFRegion()" data-tooltip="Fill All Parameter Values">F-Region</button>
+        </div>
+        <div class="param-section">Variable Parameters</div>
+        <div class="param-container" id="variable-params">
+            <div class="param-subsection">
+                <div class="param-subheading">Basic Parameters</div>
+                <div class="input-container">
+                    <div>Radar Frequency [Hz]</div>
+                    <input type="text" id="frequency" value="430e6"> <!-- Default value: 430 MHz -->
+                </div>
+                <div class="input-container">
+                    <div>Scattering Angle [°]</div>
+                    <input type="text" id="theta" value="60">
+                </div>
+                <div class="input-container">
+                    <div>Electron Density [m⁻³]</div>
+                    <input type="text" id="ne" value="2.0e11">
+                </div>
+                <div class="input-container">
+                    <div>Electron Temperature [K]</div>
+                    <input type="text" id="Te" value="500">
+                </div>
+                <div class="input-container">
+                    <div>Ion Temperature [K]</div>
+                    <input type="text" id="Ti" value="500">
+                </div>
+            </div>
+            
+            <div class="param-subsection">
+                <div class="param-subheading">Advanced Parameters</div>
+                <div class="input-container">
+                    <div>Ion Collision Frequency [Hz]</div>
+                    <input type="text" id="nu_i" value="1.0e-7">
+                </div>
+                <div class="input-container">
+                    <div>Electron Collision Frequency [Hz]</div>
+                    <input type="text" id="nu_e" value="1.0e-7">
+                </div>
+                <div class="input-container">
+                    <div>Ion Mass [kg]</div>
+                    <input type="text" id="mi" value="2.65686e-26">
+                </div>
+                <div class="input-container">
+                    <div>Electron Mass [kg]</div>
+                    <input type="text" id="me" value="9.11e-31">
+                </div>
+                <div class="input-container">
+                    <div>Magnetic Field [T]</div>
+                    <input type="text" id="B" value="3.6e-5">
+                </div>
+                <div class="input-container">
+                    <div>N Terms [unitless] <i style="font-size: smaller;">odd values will center the plot at 0</i></div>
+                    <input type="text" id="n_terms" value="2001">
+                </div>
+                
+            </div>
+        </div>
+
+        <div class="param-section">Ion Species Fractions & Densities</div>
+<div class="param-container ion-grid">
+    <!-- Total Ion Percentage -->
+    <div class="ion-total" id="ion-percentage-total">
+        Total Ion Percentage: 100%
+    </div>
+    <!-- Row 1: O+ -->
+    <div class="ion-cell">
+        <label for="Oplus_density">O<sup>+</sup> Density [m⁻³]</label>
+        <input type="text" id="Oplus_density" value="2.03e5">
+    </div>
+    <div class="ion-cell">
+        <label for="Oplus_fraction">O<sup>+</sup> Fraction (%)</label>
+        <input type="text" id="Oplus_fraction" value="48.8" oninput="updateIonPercentageTotal()">
+    </div>
+
+    <!-- Row 2: N+ -->
+    <div class="ion-cell">
+        <label for="Nplus_density">N<sup>+</sup> Density [m⁻³]</label>
+        <input type="text" id="Nplus_density" value="1.33e4">
+    </div>
+    <div class="ion-cell">
+        <label for="Nplus_fraction">N<sup>+</sup> Fraction (%)</label>
+        <input type="text" id="Nplus_fraction" value="3.2" oninput="updateIonPercentageTotal()">
+    </div>
+
+    <!-- Row 3: H+ -->
+    <div class="ion-cell">
+        <label for="Hplus_density">H<sup>+</sup> Density [m⁻³]</label>
+        <input type="text" id="Hplus_density" value="1.89e5">
+    </div>
+    <div class="ion-cell">
+        <label for="Hplus_fraction">H<sup>+</sup> Fraction (%)</label>
+        <input type="text" id="Hplus_fraction" value="45.6" oninput="updateIonPercentageTotal()">
+    </div>
+
+    <!-- Row 4: He+ -->
+    <div class="ion-cell">
+        <label for="Heplus_density">He<sup>+</sup> Density [m⁻³]</label>
+        <input type="text" id="Heplus_density" value="9.96e3">
+    </div>
+    <div class="ion-cell">
+        <label for="Heplus_fraction">He<sup>+</sup> Fraction (%)</label>
+        <input type="text" id="Heplus_fraction" value="2.4" oninput="updateIonPercentageTotal()">
+    </div>
+
+    <!-- Row 5: O2+ -->
+    <div class="ion-cell">
+        <label for="O2plus_density">O<sub>2</sub><sup>+</sup> Density [m⁻³]</label>
+        <input type="text" id="O2plus_density" value="0">
+    </div>
+    <div class="ion-cell">
+        <label for="O2plus_fraction">O<sub>2</sub><sup>+</sup> Fraction (%)</label>
+        <input type="text" id="O2plus_fraction" value="0" oninput="updateIonPercentageTotal()">
+    </div>
+
+    <!-- Row 6: NO+ -->
+    <div class="ion-cell">
+        <label for="NOplus_density">NO<sup>+</sup> Density [m⁻³]</label>
+        <input type="text" id="NOplus_density" value="0">
+    </div>
+    <div class="ion-cell">
+        <label for="NOplus_fraction">NO<sup>+</sup> Fraction (%)</label>
+        <input type="text" id="NOplus_fraction" value="0" oninput="updateIonPercentageTotal()">
+    </div>
+</div>
+
+        <div class="param-section"> Constant Parameters  <i style="font-size: smaller;"></i></div>
+        <div class="param-container" id="constant-params">
+            <div class="input-container">
+                <div>Vacuum Permittivity [F/m]</div>
+                <input type="text" id="epsilon_0" value="8.854187817e-12">
+            </div>
+            <div class="input-container">
+                <div>Boltzmann Constant [J/K]</div>
+                <input type="text" id="kB" value="1.380649e-23">
+            </div>
+            <div class="input-container">
+                <div>Elementary Charge [C]</div>
+                <input type="text" id="e" value="1.602e-19">
+            </div>
+        </div>
+    </div>
+    <div class="right-panel">
+        <div id="plot" class="plot-window plot-data"></div>
+    </div>
+    <script>
+
+function formatNumberWithCommas(input) {
+    // Parse the input value as a float
+    let value = parseFloat(input.value.replace(/,/g, ''));
+    if (!isNaN(value)) {
+        // Format the number with commas
+        input.value = value.toLocaleString('en-US');
+    }
+}
+
+function removeNumberFormatting(input) {
+    // Remove commas for editing
+    input.value = input.value.replace(/,/g, '');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Select all input fields that may contain large numbers
+    const numericInputs = document.querySelectorAll('#variable-params input[type="text"], #ion-species-params input[type="text"]');
+
+    numericInputs.forEach(input => {
+        input.addEventListener('blur', function () {
+            formatNumberWithCommas(this);
+        });
+        input.addEventListener('focus', function () {
+            removeNumberFormatting(this);
+        });
+    });
+});
+
+function updateIonPercentageTotal() {
+    // Get all ion percentage input fields
+    const ionPercentages = [
+        parseFloat(document.getElementById("Oplus_fraction").value) || 0,
+        parseFloat(document.getElementById("Nplus_fraction").value) || 0,
+        parseFloat(document.getElementById("Hplus_fraction").value) || 0,
+        parseFloat(document.getElementById("Heplus_fraction").value) || 0,
+        parseFloat(document.getElementById("O2plus_fraction").value) || 0,
+        parseFloat(document.getElementById("NOplus_fraction").value) || 0
+    ];
+
+    // Calculate the total percentage
+    const totalPercentage = ionPercentages.reduce((sum, value) => sum + value, 0);
+
+    // Update the total percentage display
+    const totalElement = document.getElementById("ion-percentage-total");
+    totalElement.textContent = `Total Ion Percentage: ${totalPercentage.toFixed(2)}%`;
+
+    // Change the color if the total is not 100%
+    if (totalPercentage !== 100) {
+        totalElement.style.color = "red";
+    } else {
+        totalElement.style.color = "#333"; // Default dark gray
+    }
+}
+        window.onload = function () {
+            const plotElement = document.getElementById("plot");
+        };
+
+        let selectedProfile = "Plot1"; // Default to Button 1
+        let plotData = []; // Store all plots
+        let visibility = { "Plot1": true, "Plot2": true, "Plot3": true }; // Track visibility state
+        let firstPlotGenerated = false; // Track if the first plot has been generated
+
+        const buttons = document.querySelectorAll(".matrix-button");
+        buttons.forEach(button => {
+            button.addEventListener("click", function () {
+                buttons.forEach(btn => btn.classList.remove("blue-button"));
+                this.classList.add("blue-button");
+
+                if (this.textContent.includes("1")) {
+                    selectedProfile = "Plot1";
+                } else if (this.textContent.includes("2")) {
+                    selectedProfile = "Plot2";
+                } else if (this.textContent.includes("3")) {
+                    selectedProfile = "Plot3";
+                }
+
+                console.log(`Profile ${selectedProfile} selected, updating input fields.`);
+
+                fetch('/get_profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ profile: selectedProfile })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    for (let key in data) {
+                        if (document.getElementById(key)) {
+                            document.getElementById(key).value = data[key];
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching profile data:", error);
+                    alert(`Error fetching data for Profile ${selectedProfile}. Please try again.`);
+                });
+            });
+        });
+
+        function generatePlot() {
+    // Declare the errorMessage variable at the top
+    const errorMessage = document.getElementById("error-message");
+
+    // Get the total ion percentage
+    const totalPercentage = parseFloat(document.getElementById("ion-percentage-total").textContent.replace("Total Ion Percentage: ", "").replace("%", ""));
+
+    // Check if the total percentage exceeds 100%
+    if (totalPercentage > 100) {
+        errorMessage.textContent = "Ion percentage exceeds 100%, please edit the values and try again.";
+        errorMessage.style.display = "inline"; // Show the error message
+        return; // Stop the function execution
+    }
+
+    // Hide the error message if the percentage is valid
+    errorMessage.style.display = "none";
+
+    // Proceed with plot generation
+    let newValues = {};
+
+    const ion_species = [
+        {
+            name: "O+",
+            fraction: parseFloat(document.getElementById("Oplus_fraction").value) / 100,
+            density: parseFloat(document.getElementById("Oplus_density").value),
+            mass: 2.65686e-26
+        },
+        {
+            name: "N+",
+            fraction: parseFloat(document.getElementById("Nplus_fraction").value) / 100,
+            density: parseFloat(document.getElementById("Nplus_density").value),
+            mass: 2.32587e-26
+        },
+        {
+            name: "H+",
+            fraction: parseFloat(document.getElementById("Hplus_fraction").value) / 100,
+            density: parseFloat(document.getElementById("Hplus_density").value),
+            mass: 1.67262e-27
+        },
+        {
+            name: "HE+",
+            fraction: parseFloat(document.getElementById("Heplus_fraction").value) / 100,
+            density: parseFloat(document.getElementById("Heplus_density").value),
+            mass: 6.64648e-27
+        },
+        {
+            name: "O2+",
+            fraction: parseFloat(document.getElementById("O2plus_fraction").value) / 100,
+            density: parseFloat(document.getElementById("O2plus_density").value),
+            mass: 5.31372e-26
+        },
+        {
+            name: "NO+",
+            fraction: parseFloat(document.getElementById("NOplus_fraction").value) / 100,
+            density: parseFloat(document.getElementById("NOplus_density").value),
+            mass: 2.4828e-26
+        }
+    ];
+    newValues["ion_species"] = ion_species;
+
+    const plotElement = document.getElementById("plot");
+    const loadingMessage = document.getElementById("loading-message");
+
+    loadingMessage.style.display = "block"; // Show the loading message
+    errorMessage.style.display = "none"; // Hide the error message
+
+    const currentProfile = selectedProfile;
+
+    console.log(`Generating plot for profile: ${currentProfile}`);
+
+    document.querySelectorAll("input").forEach(input => {
+        newValues[input.id] = parseFloat(input.value);
+    });
+
+    fetch('/update_values', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newValues)
+    })
+    .then(() => fetch('/plot'))
+    .then(response => response.json())
+    .then(data => {
+        console.log("Received Data:", data);
+
+        let colors = { "Plot 1": "blue", "Plot 2": "red", "Plot 3": "green" };
+
+        let trace = {
+            x: data.frequencies,
+            y: data.spectra,
+            mode: 'lines',
+            name: currentProfile,
+            line: { color: colors[currentProfile] },
+            visible: visibility[currentProfile] ? true : "legendonly"
+        };
+
+        let existingTraceIndex = plotData.findIndex(t => t.name === currentProfile);
+        if (existingTraceIndex !== -1) {
+            plotData[existingTraceIndex] = trace;
+        } else {
+            plotData.push(trace);
+        }
+
+        let layout = {
+            title: 'Backscatter Spectra',
+            xaxis: { title: 'Frequency (MHz)' },
+            yaxis: { title: 'Spectra', type: 'log' },
+            hovermode: 'x unified',
+            autosize: true
+        };
+
+        Plotly.newPlot('plot', plotData, layout, { responsive: true });
+
+        // Apply fade-in effect
+        plotElement.classList.add('visible');
+        console.log("Added 'visible' class to plot element.");
+    })
+    .catch(error => {
+        console.error("Error generating plot:", error);
+        errorMessage.textContent = `Error generating plot. Please check your inputs and try again.`;
+        errorMessage.style.display = "inline"; // Show the error message
+    })
+    .finally(() => {
+        loadingMessage.style.display = "none"; // Hide the loading message
+    });
+}
+
+        function toggleVisibility(profileIndex) {
+            const profileNames = ["Plot1", "Plot2", "Plot3"]; // Map indices to profile names
+            const profileName = profileNames[profileIndex]; // Get the profile name for the given index
+
+            // Check if the plot data exists for the given profile name
+            const traceIndex = plotData.findIndex(t => t.name === profileName);
+            if (traceIndex !== -1) {
+                // Toggle visibility between true and 'legendonly'
+                plotData[traceIndex].visible = plotData[traceIndex].visible === true ? 'legendonly' : true;
+
+                // Define the layout to preserve the original plot appearance
+                const layout = {
+                    title: 'Backscatter Spectra',
+                    xaxis: { title: 'Frequency (MHz)' },
+                    yaxis: { title: 'Spectra', type: 'log' },
+                    hovermode: 'x unified',
+                    autosize: true
+                };
+
+                // Re-render the plot with the updated data and layout
+                Plotly.react('plot', plotData, layout, { responsive: true });
+            } else {
+                console.warn(`No plot data found for profile: ${profileName}. Generate the plot first.`);
+                alert(`No plot data found for ${profileName}. Please generate the plot first.`);
+            }
+        }
+
+        document.querySelector(".generate-btn").addEventListener("click", generatePlot);
+
+        fetch('/get_profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ profile: "Plot1" })
+        })
+        .then(response => response.json())
+        .then(data => {
+            for (let key in data) {
+                if (document.getElementById(key)) {
+                    document.getElementById(key).value = data[key];
+                }
+            }
+        })
+        .catch(error => {
+            console.error("Error loading default profile data:", error);
+            alert("Error loading default profile data. Please refresh the page and try again.");
+        });
+
+        function resetValues() {
+            // Default values for Plot1 ion species
+    const defaultIonSpecies = [
+        { fraction: 48.8, density: 2.03e5 }, // O+
+        { fraction: 3.2,  density: 1.33e4 }, // N+
+        { fraction: 45.6, density: 1.89e5 }, // H+
+        { fraction: 2.4,  density: 9.96e3 }, // HE+
+        { fraction: 0,    density: 0 },      // O2+
+        { fraction: 0,    density: 0 }       // NO+
+    ];
+
+    // Reset ion fractions and densities
+    document.getElementById("Oplus_fraction").value = defaultIonSpecies[0].fraction;
+    document.getElementById("Oplus_density").value   = defaultIonSpecies[0].density;
+    document.getElementById("Nplus_fraction").value  = defaultIonSpecies[1].fraction;
+    document.getElementById("Nplus_density").value   = defaultIonSpecies[1].density;
+    document.getElementById("Hplus_fraction").value  = defaultIonSpecies[2].fraction;
+    document.getElementById("Hplus_density").value   = defaultIonSpecies[2].density;
+    document.getElementById("Heplus_fraction").value = defaultIonSpecies[3].fraction;
+    document.getElementById("Heplus_density").value  = defaultIonSpecies[3].density;
+    document.getElementById("O2plus_fraction").value = defaultIonSpecies[4].fraction;
+    document.getElementById("O2plus_density").value  = defaultIonSpecies[4].density;
+    document.getElementById("NOplus_fraction").value = defaultIonSpecies[5].fraction;
+    document.getElementById("NOplus_density").value  = defaultIonSpecies[5].density;
+    
+            const profileData = {
+                "Plot1": {
+                    nu_i: "1.0e-7",
+                    nu_e: "1.0e-7",
+                    ni: "2.0e11",
+                    ne: "2.0e11",
+                    theta: "60",
+                    Te: "500",
+                    Ti: "500",
+                    frequency: "430e6",
+                    n_terms: "2001",
+                    mi: "2.65686e-26",
+                    me: "9.11e-31",
+                    B: "3.6e-5",
+                    epsilon_0: "8.854187817e-12",
+                    kB: "1.380649e-23",
+                    e: "1.602e-19"
+                },
+                "Plot2": {
+                    nu_i: "2.0e-7",
+                    nu_e: "2.0e-7",
+                    ni: "2.5e11",
+                    ne: "2.5e11",
+                    theta: "70",
+                    Te: "1000",
+                    Ti: "1000",
+                    frequency: "430e6",
+                    n_terms: "3001",
+                    mi: "2.75686e-26",
+                    me: "1.01e-30",
+                    B: "4.0e-5",
+                    epsilon_0: "8.954187817e-12",
+                    kB: "1.480649e-23",
+                    e: "1.702e-19"
+                },
+                "Plot3": {
+                    nu_i: "3.0e-7",
+                    nu_e: "3.0e-7",
+                    ni: "3.0e11",
+                    ne: "3.0e11",
+                    theta: "80",
+                    Te: "1500",
+                    Ti: "1500",
+                    frequency: "430e6",
+                    n_terms: "4001",
+                    mi: "3.65686e-26",
+                    me: "1.11e-30",
+                    B: "4.5e-5",
+                    epsilon_0: "9.054187817e-12",
+                    kB: "1.580649e-23",
+                    e: "1.802e-19"
+                }
+            };
+            let selectedProfile = "Plot1";
+            console.log("Resetting values for profile:", selectedProfile);
+            const profile = profileData[selectedProfile];
+            for (let key in profile) {
+                if (document.getElementById(key)) {
+                    document.getElementById(key).value = profile[key];
+                }
+            }
+        }
+
+        let isLogScale = true; // Track the current scale (default is log)
+
+function toggleScale() {
+    const layout = {
+        title: 'Backscatter Spectra',
+        xaxis: { title: 'Frequency (MHz)' },
+        yaxis: {
+            title: 'Spectra',
+            type: isLogScale ? 'linear' : 'log' // Toggle between 'linear' and 'log'
+        },
+        hovermode: 'x unified',
+        autosize: true
+    };
+
+    // Update the plot with the new scale
+    Plotly.react('plot', plotData, layout, { responsive: true });
+
+    // Toggle the scale state
+    isLogScale = !isLogScale;
+
+    console.log(`Y-axis scale toggled to: ${isLogScale ? 'logarithmic' : 'linear'}`);
+}
+
+function zoomToIonLine() {
+    // Ensure plot data exists
+    if (!plotData || plotData.length === 0) {
+        console.error("No plot data available to zoom into the ion line.");
+        alert("Please generate the plot first before zooming into the ion line.");
+        return;
+    }
+
+    // Define the zoom range for the ion line
+    const ionLineXRange = [-0.05, 0.05]; // Centered around 0, adjust width as needed
+    const ionLineYRange = [10e-9, 10e-6]; // Y-axis range for the ion line (logarithmic scale)
+
+    // Update the plot layout to zoom in on the ion line
+    Plotly.relayout('plot', {
+        'xaxis.range': ionLineXRange,
+        'yaxis.type': 'log', // Ensure the y-axis is set to logarithmic
+        'yaxis.range': [Math.log10(ionLineYRange[0]), Math.log10(ionLineYRange[1])] // Convert to log scale
+    });
+
+    console.log("Zoomed in on the ion line with y-axis range:", ionLineYRange);
+}
+
+function setERegion() {
+    // Set temperatures
+    document.getElementById("Ti").value = 1143;
+    document.getElementById("Te").value = 1454;
+
+    // Set ion fractions (in percent)
+    document.getElementById("Oplus_fraction").value = 97.4;
+    document.getElementById("Nplus_fraction").value = 1.8;
+    document.getElementById("Hplus_fraction").value = 0.7;
+    document.getElementById("Heplus_fraction").value = 0.1;
+    document.getElementById("O2plus_fraction").value = 0;
+    document.getElementById("NOplus_fraction").value = 0;
+
+    document.getElementById("Oplus_density").value = 6.88e6;
+    document.getElementById("Nplus_density").value = 1.27e5;
+    document.getElementById("Hplus_density").value = 4.94e4;
+    document.getElementById("Heplus_density").value = 7.06e3;
+    document.getElementById("O2plus_density").value = 0;
+    document.getElementById("NOplus_density").value = 0;
+}
+
+function setFRegion() {
+    // Set temperatures
+    document.getElementById("Ti").value = 3675;
+    document.getElementById("Te").value = 3675;
+
+    // Set ion fractions (in percent)
+    document.getElementById("Oplus_fraction").value = 8.1;
+    document.getElementById("Nplus_fraction").value = 1.6;
+    document.getElementById("Hplus_fraction").value = 85.0;
+    document.getElementById("Heplus_fraction").value = 5.2;
+    document.getElementById("O2plus_fraction").value = 0;
+    document.getElementById("NOplus_fraction").value = 0;
+
+    document.getElementById("Oplus_density").value = 1.02e4;
+    document.getElementById("Nplus_density").value = 2.01e3;
+    document.getElementById("Hplus_density").value = 1.07e5;
+    document.getElementById("Heplus_density").value = 6.52e3;
+    document.getElementById("O2plus_density").value = 0;
+    document.getElementById("NOplus_density").value = 0;
+}
+    </script>
+</body>
+</html>

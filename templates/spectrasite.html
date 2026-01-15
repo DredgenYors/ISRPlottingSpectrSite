@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISR Spectra Simulator</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+    
+        h1 {
+            font-size: 3em;
+            text-align: center;
+            opacity: 0;
+            animation: fadeIn 3s ease-in-out forwards;
+        }
+    
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+    
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            opacity: 0;
+            animation: fadeIn 1.5s ease-in-out forwards;
+            animation-delay: 2s;
+        }
+    
+        .button-container button {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border: none;
+            background-color: #007BFF;
+            color: white;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            pointer-events: none;
+        }
+    
+        .button-container button:hover {
+            background-color: #0056b3;
+        }
+    
+        .tooltip {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            white-space: nowrap;
+            display: none;
+            z-index: 9999;
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <h1 id="header">ISR Spectra Simulator</h1>
+
+    <!-- Tooltip Element -->
+    <div id="tooltip" class="tooltip"></div>
+
+    <div class="button-container" id="buttons">
+        <button onmouseover="showTooltip(event, 'Generate Plots by Changing Parameters')" onmouseout="hideTooltip()"
+            onclick="window.location.href='/plot_page';">
+            Plotting
+        </button>
+        <button onmouseover="showTooltip(event, 'View the Code That Generates the Plots')" onmouseout="hideTooltip()"
+            onclick="window.location.href='https://nbviewer.org/github/DredgenYors/JupyterNotebookTesting/blob/main/JupyterTesting.ipynb';">
+            Jupyter Notebook
+        </button>
+        <button onmouseover="showTooltip(event, 'The Incoherent Scatter Radar Website')" onmouseout="hideTooltip()"
+            onclick="redirectToISR();">
+            ISR Site
+        </button>
+    </div>
+
+    <script>
+        function redirectToISR() {
+            window.location.href = "/"; // Redirects back to the main ISR site (index.html)
+        }
+
+        let tooltipsEnabled = false; // Initially disable tooltips & clicks
+
+        document.addEventListener("DOMContentLoaded", function () {
+            let buttonContainer = document.getElementById("buttons");
+            let buttons = buttonContainer.getElementsByTagName("button");
+
+            // Wait for the fade-in animation to complete
+            buttonContainer.addEventListener("animationend", function () {
+                tooltipsEnabled = true; // Enable tooltips
+                for (let button of buttons) {
+                    button.style.cursor = "pointer"; // Enable pointer cursor
+                    button.style.pointerEvents = "auto"; // Enable clicking
+                }
+            });
+        });
+
+        function showTooltip(event, message) {
+            if (!tooltipsEnabled) return; // Prevent tooltips before fade-in
+
+            let tooltip = document.getElementById("tooltip");
+            tooltip.textContent = message;
+            tooltip.style.display = "block";
+            tooltip.style.left = (event.pageX + 15) + "px";
+            tooltip.style.top = (event.pageY + 15) + "px";
+        }
+
+        function hideTooltip() {
+            document.getElementById("tooltip").style.display = "none";
+        }
+
+        // Move tooltip dynamically with cursor
+        document.addEventListener("mousemove", function (event) {
+            let tooltip = document.getElementById("tooltip");
+            if (tooltip.style.display === "block") {
+                tooltip.style.left = (event.pageX + 15) + "px";
+                tooltip.style.top = (event.pageY + 15) + "px";
+            }
+        });
+    </script>
+</body>
+
+</html>
