@@ -3,8 +3,6 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-import matplotlib.pyplot as plt
-import numpy as np
 from scipy.special import ive, dawsn
 import scipy.special as sp
 import numexpr as ne
@@ -220,7 +218,7 @@ def calcSpectra(M_i, M_e, chi_i, chi_e):
     spectrum = 2*np.abs(1-chi_e/epsilon)**2*M_e+2*np.abs(chi_e/epsilon)**2*M_i #calculate the spectrum using ion and electron components
     return spectrum
 
-def plot_combined_spectra(omega_values, chirag_spectra_list, marcos_spectra, Te_values):
+def plot_combined_spectra(omega_values, chirag_spectra_list, marcos_spectra, Te_values, alpha_chirag=None, alpha_marco=None):
     """
     Plots both Chirag's and Marcos' spectra on the same plot.
 
@@ -247,6 +245,19 @@ def plot_combined_spectra(omega_values, chirag_spectra_list, marcos_spectra, Te_
     ax.grid(True, which='both', linestyle='--', linewidth=0.5)
     ax.set_yscale('log')
     ax.set_xlim(-6, 6)
+    # Annotate alpha (collective parameter) values on the plot
+    if (alpha_chirag is not None) or (alpha_marco is not None):
+        lines = []
+        if alpha_chirag is not None:
+            lines.append(f"Chirag α = {alpha_chirag:.3e}")
+        if alpha_marco is not None:
+            lines.append(f"Marco α = {alpha_marco:.3e}")
+        ax.text(
+            0.02, 0.98, "\n".join(lines), transform=ax.transAxes,
+            va='top', ha='left', fontsize=10,
+            bbox=dict(boxstyle='round', facecolor='white', alpha=0.8, edgecolor='0.8')
+        )
+
     plt.tight_layout()
     plt.show()
 
@@ -287,6 +298,7 @@ if __name__ == "__main__":
     rho_e = calculate_average_gyroradius(vth_e, Oc_e)
     lambda_De = calculate_debye_length(Te_values, ne_, epsilon_0, kB, e)
     alpha_e = calculate_alpha(k_total, lambda_De)
+    alpha_chirag = alpha_e  # Chirag alpha (collective parameter) used in this formulation
     c = calculate_sound_speed(kB, Te_values, Ti, sum(ion["fraction"] * ion["mass"] for ion in ion_species))
     omega_values = calculate_omega_values(k_total, c)
 
@@ -350,12 +362,20 @@ if __name__ == "__main__":
         modnu = 2
 
         isr_spc = isrSpectrum(N, fs, lambdaB, aspdeg, plasma, modgy=modgy, modnu=modnu)
-        return isr_spc.f / 1E3, isr_spc.spc
+
+        # Marco alpha (collective parameter) using Bragg wavenumber kB = 2*pi/lambdaB
+        # Debye length (electron) based on plasma Ne and Te
+        eps0 = 8.854187817e-12
+        kB_const = 1.380649e-23
+        e_charge = 1.602e-19
+        lambda_De = np.sqrt(eps0 * kB_const * Te / (Ne * e_charge**2))
+        k_bragg = 2 * np.pi / lambdaB
+        alpha_marco = 1.0 / (k_bragg * lambda_De)
+
+        return (isr_spc.f / 1E3), isr_spc.spc, alpha_marco
 
     # Generate Marcos' spectra
-    marcos_spectra = run_marco_spectrum()
-
-    marcos_freq, marcos_spectrum = marcos_spectra
+    marcos_freq, marcos_spectrum, alpha_marco = run_marco_spectrum()
     marcos_freq_mhz = marcos_freq / 1000  # Convert kHz to MHz
 
     mhz_values = [-5, -3, -1, 0, 1, 3, 5]  # Frequencies in MHz
@@ -374,5 +394,16 @@ if __name__ == "__main__":
         print(f"  Chirag's Spectra: {chirag_value}")
         print(f"  Marco's Spectra: {marcos_value}")
 
+    # Print alpha values alongside the plotted spectra
+    print(f"Chirag alpha (as used in this script): {alpha_chirag:.6e}")
+    print(f"Marco alpha (Bragg k): {alpha_marco:.6e}")
+
     # Plot combined spectra with adjusted frequency scale
-    plot_combined_spectra(omega_values, [spectra], (marcos_freq_mhz, marcos_spectrum), [Te_values])
+    plot_combined_spectra(
+        omega_values,
+        [spectra],
+        (marcos_freq_mhz, marcos_spectrum),
+        [Te_values],
+        alpha_chirag=alpha_chirag,
+        alpha_marco=alpha_marco,
+    )
