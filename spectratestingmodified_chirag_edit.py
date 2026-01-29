@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.special import ive, dawsn
 import scipy.special as sp
-import numexpr as ne
 
 def calculate_wavenumber_components(lambda_wavelength, theta_degrees):
     """
@@ -124,13 +123,16 @@ def calculate_collisional_term(nu, k_par, vth, k_perp, rho, n, omega, Oc):
    Returns;
     - U (complex float): Collisional Term.
     """
-    U = np.zeros_like(omega) + 1j * 0.0
-    k_rho_sq = (k_perp ** 2) * (rho ** 2)
-    for i in range(-n, n + 1):
-        yn = (omega - i * Oc - 1j * nu) / (k_par * vth)
-        exp_term = ne.evaluate('exp(-yn**2)')
-        U += sp.ive(i, k_rho_sq) * (2 * sp.dawsn(yn) + 1j * np.sqrt(np.pi) * exp_term)
-    U = U * 1j * nu / (k_par * vth)
+    U = np.zeros_like(omega) + 1j * 0.0 #create an array of complex 0s the same size as the omega values array
+    k_rho_sq = (k_perp ** 2) * (rho ** 2) #calculate the k_rho_sq constant
+    
+    for i in range(-n, n + 1): #iterate from -n to n + 1
+        yn = (omega - i * Oc - 1j * nu) / (k_par * vth) #calculate the yn constant, using the current value of i 
+                                                        #omega is adjusted by subtracting the current cyclotron frequency and the collisional damping
+                                                        #omega is normalized by dividing by the parallel wavenumber and thermal velocity
+        
+        U += sp.ive(i, k_rho_sq) * (2 * sp.dawsn(yn) + 1j * np.sqrt(np.pi) * np.exp(-yn ** 2)) #accumulate the components
+    U = U * 1j * nu / (k_par * vth) #scale U by the collisional damping factor  
     return U
 
 def calculate_modified_distribution(omega, k_par, k_perp, vth, n, rho, Oc, nu, U):
@@ -139,18 +141,35 @@ def calculate_modified_distribution(omega, k_par, k_perp, vth, n, rho, Oc, nu, U
     """
     M = np.zeros_like(omega) + 1j * 0.0
     k_rho_sq = (k_perp ** 2) * (rho ** 2)
+    
+    # Term involving |U|^2
     term_one = -(abs(U) ** 2) / (nu * (abs(1 + U) ** 2))
+    
+    # Prefactor involving k_parallel and vth
     term_two = 1 / (k_par * vth * (abs(1 + U) ** 2))
+    
+    # Summation term
     for i in range(-n, n + 1):
         yn = (omega - i * Oc - 1j * nu) / (k_par * vth)
-        exp_re = np.real(ne.evaluate('exp(-yn**2)'))
-        imag_da = 2 * np.imag(dawsn(yn))
+        
+        # Real part of the exponential term
+        exp_re = np.real(np.exp(-yn**2))
+        
+        # Imaginary part (Dawson function term)
+        imag_da = 2*np.imag(dawsn(yn))
+        
+        # Bessel function and exponential term
         bessel_term = ive(i, k_rho_sq)
+        # exp_term = np.exp(-k_rho_sq) # not included, called already in ive 
+        
+        # Combine all terms in the summation
         M += bessel_term * (np.sqrt(np.pi) * exp_re + imag_da)
+    
+    # Combine all terms into M_s
     M_s = term_one + term_two * M
     return np.real(M_s)
 
-def calculate_debye_length(Te, ne_, epsilon_0, kB, e):
+def calculate_debye_length(Te, ne, epsilon_0, kB, e):
     """
     Calculate the electron Debye length.
 
@@ -164,7 +183,7 @@ def calculate_debye_length(Te, ne_, epsilon_0, kB, e):
     Returns:
     - Electron Debye length (float) [m].
     """
-    lambda_De = np.sqrt(epsilon_0 * kB * Te / (ne_ * e**2)) #calculate the debye length
+    lambda_De = np.sqrt(epsilon_0 * kB * Te / (ne * e**2)) #calculate the debye length
     return lambda_De
 
 def calculate_alpha(k, lambda_De):
@@ -197,18 +216,20 @@ def calculate_electric_susceptibility(omega, k_par, k_perp, vth, n, rho, Oc, nu,
     Returns:
     - an array of values, representing the real and imaginary portion of the electric susceptibility.
     """
-    chi = np.zeros_like(omega) + 1j * 0.0
-    k_rho_sq = (k_perp ** 2) * (rho ** 2)
-    term_one = (omega - 1j * nu) / (k_par * vth)
-    term_four = (alpha ** 2) / (1 + U)
-    term_five = Te / Ts
-    for i in range(-n, n + 1):
-        yn = (omega - i * Oc - 1j * nu) / (k_par * vth)
-        term_two = 2 * sp.dawsn(yn)
-        exp_term = ne.evaluate('exp(-yn**2)')
-        term_three = 1j * np.sqrt(np.pi) * exp_term
-        chi += sp.ive(i, k_rho_sq) * (1 - term_one * (term_two + term_three))
-    return term_four * term_five * chi
+    chi = np.zeros_like(omega) + 1j * 0.0 #create an array of complex 0s, the same size as the omega values array
+    k_rho_sq = (k_perp ** 2) * (rho ** 2) #calculate the k_rho_sq constant
+    term_one = (omega - 1j * nu) / (k_par * vth) #calculate the first term
+    term_four = (alpha ** 2) / (1 + U) #calculate the fourth term
+    term_five = Te / Ts #calculate the fifth term
+    for i in range(-n, n + 1): #iterate from -n to n + 1
+        yn = (omega - i * Oc - 1j * nu) / (k_par * vth) #calculate the yn constant, using the current value of i 
+                                                        #omega is adjusted by subtracting the current cyclotron frequency and the collisional damping
+                                                        #omega is normalized by dividing by the parallel wavenumber and thermal velocity 
+        
+        term_two = 2 * sp.dawsn(yn) #calculate the second term using the current value of yn
+        term_three = 1j * np.sqrt(np.pi) * np.exp(-yn ** 2) #calculate the second term using the current value of yn
+        chi += sp.ive(i, k_rho_sq) * (1 - term_one * (term_two + term_three)) #accumulate the terms
+    return term_four * term_five * chi #return the remaining terms and the accumulated term
 
 def calcSpectra(M_i, M_e, chi_i, chi_e):
     """
@@ -228,14 +249,13 @@ def calcSpectra(M_i, M_e, chi_i, chi_e):
 # Ensure the script only runs when executed directly, not when imported
 if __name__ == "__main__":
     # Sample Data
-    nu_i = 1e-7 # Ion collision frequency in Hz
-    nu_e = 1e-7  # Electron collision frequency in Hz
-    ni =  2e11  # Ion and electron densities in m^-3
-    ne_ = 2e11
+    nu_i = .0000001  # Ion collision frequency in Hz
+    nu_e = 0.0000001  # Electron collision frequency in Hz
+    ni = ne = 2e11  # Ion and electron densities in m^-3
     mi = 2.65686e-26  # Ion mass (atomic oxygen) in kg
     m_e = 9.11e-31  # Electron mass [kg]
     B = 3.6e-5  # Magnetic field strength in Tesla
-    theta = 60  # Scattering angle in degrees
+    theta = 80  # Scattering angle in degrees
     Te_values = [500, 1500, 2500, 3500]  # Electron temperatures in Kelvin
 
     epsilon_0 = 8.854187817e-12  # Vacuum permittivity [F/m]
@@ -245,9 +265,9 @@ if __name__ == "__main__":
     # Define your ion species here
     ion_species = [
         {"name": "O+",   "fraction": 0.488, "density": 2.03e5, "mass": 2.65686e-26},
-        {"name": "N+",   "fraction": 0.0, "density": 1.33e4, "mass": 2.32587e-26},
-        {"name": "H+",   "fraction": 0.0, "density": 1.89e5, "mass": 1.67262e-27},
-        {"name": "HE+",  "fraction": 0.0, "density": 9.96e3, "mass": 6.64648e-27},
+        {"name": "N+",   "fraction": 0.032, "density": 1.33e4, "mass": 2.32587e-26},
+        {"name": "H+",   "fraction": 0.456, "density": 1.89e5, "mass": 1.67262e-27},
+        {"name": "HE+",  "fraction": 0.024, "density": 9.96e3, "mass": 6.64648e-27},
         {"name": "O2+",  "fraction": 0.0,   "density": 0.0,    "mass": 5.31372e-26},
         {"name": "NO+",  "fraction": 0.0,   "density": 0.0,    "mass": 2.4828e-26}
     ]
@@ -265,7 +285,7 @@ if __name__ == "__main__":
         Oc_e = calculate_cyclotron_frequency(1, e, B, m_e)
         rho_i = calculate_average_gyroradius(vth_i, Oc_i)
         rho_e = calculate_average_gyroradius(vth_e, Oc_e)
-        lambda_De = calculate_debye_length(Te, ne_, epsilon_0, kB, e)
+        lambda_De = calculate_debye_length(Te, ne, epsilon_0, kB, e)
         lambda_Di = calculate_debye_length(Te, ni, epsilon_0, kB, e)
         alpha_e = calculate_alpha(k_total, lambda_De)
         alpha_i = calculate_alpha(k_total, lambda_Di)
@@ -297,7 +317,7 @@ if __name__ == "__main__":
                 M_i_total += frac * M_i
                 chi_i_total += frac * chi_i
                 
-        spectra = calcSpectra(M_i_total, M_e, chi_i_total, chi_e)
+        spectra = calcSpectra(M_i, M_e, chi_i, chi_e)
         spectra_list.append(spectra)
     
     # Plotting

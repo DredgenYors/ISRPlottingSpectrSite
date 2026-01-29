@@ -1,5 +1,20 @@
 const dropdownData = {
     THEORY: [
+<<<<<<< HEAD
+        { label: "T.1: Thomson Scattering", link: "https://en.wikipedia.org/wiki/Thomson_scattering" },
+        { label: "T.2: Fluctuation-Dissipation Approach", link: "https://en.wikipedia.org/wiki/Fluctuation-dissipation_theorem" }
+    ],
+    OBSERVATION: [
+        { label: "O.1: Standard Madrigal Outputs", link: "https://en.wikipedia.org/wiki/Haystack_Observatory" },
+        { label: "O.2: Instabilities", link: "https://en.wikipedia.org/wiki/Incoherent_scatter" }
+    ],
+    EXPERIMENT: [
+        { label: "E.1: Overview of Existing Radars", link: "https://en.wikipedia.org/wiki/List_of_radars" },
+        { label: "E.2: Basic Experimental Setup", link: "#" }
+    ],
+    JUPYTER_NOTEBOOK: [
+        { label: "J.1: Jupyter Testing", link: "https://nbviewer.org/github/DredgenYors/JupyterNotebookTesting/blob/main/JupyterTesting.ipynb" }
+=======
         { label: "T.1: Thomson Scattering (Temp. for Testing)", link: "https://en.wikipedia.org/wiki/Thomson_scattering" },
         { label: "T.2: Fluctuation-Dissipation Approach (Temp. for Testing)", link: "https://en.wikipedia.org/wiki/Fluctuation-dissipation_theorem" }
     ],
@@ -20,6 +35,7 @@ const dropdownData = {
             label: "JB.2: Spectra Calculation with Multi-Ion and Varying Temperature Support", 
             link: "https://nbviewer.org/github/DredgenYors/Updated-Spectra-Jupyter-Notebook-August-2025/blob/main/ISR_spectra_JB.ipynb" 
         }
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
     ],
     SIMULATION: [
         { label: "S.1: Simulation Setup", link: "#" },
@@ -27,6 +43,21 @@ const dropdownData = {
     ]
 };
 
+<<<<<<< HEAD
+function toggleDropdown(category) {
+    const dropdownContainer = document.getElementById("dropdown-container");
+    if (dropdownContainer.style.display === "block") {
+        dropdownContainer.style.display = "none";
+        return;
+    }
+
+    dropdownContainer.innerHTML = dropdownData[category]
+        .map(item => `<a href="${item.link}" target="_blank" class="dropdown-item">${item.label}</a>`)
+        .join("");
+    dropdownContainer.style.display = "block";
+}
+
+=======
 // ================================================================================
 // DROPDOWN MENU FUNCTIONALITY
 // ================================================================================
@@ -125,4 +156,5 @@ function showExtraISR(category) {
         extraLinks.appendChild(li);
     });
 }
+>>>>>>> 91364ff5daad93d415acdf0c7845bc9a90f3aa85
 
